@@ -62,7 +62,7 @@ V12: ⊥ real data in screenshots; synthetic labeled
 | --- | ------ | -------------------------------------------------------------------------------------------------- | ----------- |
 | T1  | x      | design system: fonts, `@theme` tokens, print.css                                                   | V10         |
 | T2  | x      | AppLayout shell: sidebar/topbar, icons, reduced-motion                                             | V11         |
-| T3  | .      | UI primitives: Button, Input, Badge, Card, Modal/Drawer, Table, EmptyState, Skeleton, format utils | V10         |
+| T3  | x      | UI primitives: Button, Input, Badge, Card, Modal/Drawer, Table, EmptyState, Skeleton, format utils | V10         |
 | T4  | .      | Login screen                                                                                       | V1-V12      |
 | T5  | .      | Dashboard screen                                                                                   | V12         |
 | T6  | .      | POS screen: grid, cart, scan, checkout                                                             | V3,V4,V7,V8 |

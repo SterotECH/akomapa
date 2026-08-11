@@ -4,6 +4,26 @@ import { cn } from '@/lib/utils';
 const size = 24;
 const strokeWidth = 1.75;
 
+export type IconName =
+    | 'dashboard'
+    | 'pos'
+    | 'products'
+    | 'stock'
+    | 'reports'
+    | 'logout'
+    | 'search'
+    | 'cart'
+    | 'plus'
+    | 'minus'
+    | 'close'
+    | 'check'
+    | 'print'
+    | 'download'
+    | 'warning'
+    | 'clock'
+    | 'barcode'
+    | 'filter';
+
 const paths: Record<IconName, ReactNode> = {
     dashboard: (
         <>
@@ -49,10 +69,72 @@ const paths: Record<IconName, ReactNode> = {
             <path d="M21 12H9" />
         </>
     ),
+    search: (
+        <>
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.3-4.3" />
+        </>
+    ),
+    cart: (
+        <>
+            <circle cx="8" cy="21" r="1.2" />
+            <circle cx="19" cy="21" r="1.2" />
+            <path d="M2.5 2.5h2.1l2.3 11.5a1.5 1.5 0 0 0 1.5 1.2h8.9a1.5 1.5 0 0 0 1.5-1.2l1.6-7.3H5" />
+        </>
+    ),
+    plus: (
+        <>
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+        </>
+    ),
+    minus: <path d="M5 12h14" />,
+    close: (
+        <>
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+        </>
+    ),
+    check: <path d="M20 6 9 17l-5-5" />,
+    print: (
+        <>
+            <path d="M6 9V2h12v7" />
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+            <rect x="6" y="14" width="12" height="8" rx="1" />
+        </>
+    ),
+    download: (
+        <>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="m7 10 5 5 5-5" />
+            <path d="M12 15V3" />
+        </>
+    ),
+    warning: (
+        <>
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+        </>
+    ),
+    clock: (
+        <>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+        </>
+    ),
+    barcode: (
+        <>
+            <path d="M3 5v14" />
+            <path d="M7 5v14" />
+            <path d="M11 5v10" />
+            <path d="M15 5v14" />
+            <path d="M19 5v10" />
+            <path d="M21 5v14" />
+        </>
+    ),
+    filter: <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z" />,
 };
-
-export type IconName =
-    'dashboard' | 'pos' | 'products' | 'stock' | 'reports' | 'logout';
 
 export function Icon({
     name,
