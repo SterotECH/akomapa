@@ -38,6 +38,8 @@
     --spacing-lg: 24px;
     --spacing-xl: 32px;
 
+    --transition-duration-fast: 120ms;
+
     --text-display: 28px;
     --text-display--line-height: 1.15;
     --text-display--font-weight: 600;
