@@ -60,7 +60,7 @@ V12: ⊥ real data in screenshots; synthetic labeled
 
 | id  | status | task                                                                                               | cites       |
 | --- | ------ | -------------------------------------------------------------------------------------------------- | ----------- |
-| T1  | .      | design system: fonts, `@theme` tokens, print.css                                                   | V10         |
+| T1  | x      | design system: fonts, `@theme` tokens, print.css                                                   | V10         |
 | T2  | .      | AppLayout shell: sidebar/topbar, icons, reduced-motion                                             | V11         |
 | T3  | .      | UI primitives: Button, Input, Badge, Card, Modal/Drawer, Table, EmptyState, Skeleton, format utils | V10         |
 | T4  | .      | Login screen                                                                                       | V1-V12      |

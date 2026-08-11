@@ -1,0 +1,56 @@
+@media print {
+    @page {
+        size: A4;
+        margin: 12mm 10mm;
+    }
+
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    .app-sidebar,
+    .app-topbar,
+    .print-hide,
+    .no-print,
+    button,
+    input,
+    select,
+    textarea {
+        display: none !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-shadow: none !important;
+        text-shadow: none !important;
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .print-area {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .report-header {
+        border-bottom: 2px solid #ffbf00 !important;
+    }
+
+    .report-header h1,
+    .report-header p,
+    .report-header .wordmark {
+        color: #000 !important;
+    }
+
+    a {
+        color: #000 !important;
+        text-decoration: underline;
+    }
+
+    th,
+    td {
+        border-color: #000 !important;
+    }
+}
