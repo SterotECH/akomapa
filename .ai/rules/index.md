@@ -6,4 +6,4 @@ Before planning or editing, find the row whose globs match the file's path and r
 | --- | --- |
 | resources/css/** | .ai/rules/css.md |
 | resources/js/** | .ai/rules/js.md |
-| resources/js/pages/Pos.tsx | .ai/rules/pages.md |
+| resources/js/pages/Pos.tsx, resources/js/pages/Products.tsx | .ai/rules/pages.md |

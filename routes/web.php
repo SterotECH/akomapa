@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\ProductsController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -13,7 +14,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/pos', [PosController::class, 'index'])
         ->name('pos.index');
 
-    Route::inertia('/products', 'Placeholder', ['title' => 'Products', 'task' => 'T7'])
+    Route::get('/products', [ProductsController::class, 'index'])
         ->name('products.index');
 
     Route::inertia('/stock', 'Placeholder', ['title' => 'Stock', 'task' => 'T8'])
