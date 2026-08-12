@@ -354,6 +354,11 @@ export const todaySummary = {
     lowStock: lowStockProducts.length,
 };
 
+export const todaySales = {
+    count: todaySummary.items,
+    total: todaySummary.sales,
+};
+
 const DAY_MS = 86_400_000;
 
 export const salesWeek: { label: string; value: number }[] = (() => {

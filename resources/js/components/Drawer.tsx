@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect } from 'react';
-import type { PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 import { Icon } from '@/components/Icon';
 import { useSprings } from '@/lib/motion';
 
@@ -8,9 +8,16 @@ interface DrawerProps extends PropsWithChildren {
     open: boolean;
     onClose: () => void;
     title: string;
+    footer?: ReactNode;
 }
 
-export function Drawer({ open, onClose, title, children }: DrawerProps) {
+export function Drawer({
+    open,
+    onClose,
+    title,
+    footer,
+    children,
+}: DrawerProps) {
     const { gentle } = useSprings();
 
     useEffect(() => {
@@ -67,6 +74,11 @@ export function Drawer({ open, onClose, title, children }: DrawerProps) {
                         <div className="flex-1 overflow-y-auto px-6 py-4">
                             {children}
                         </div>
+                        {footer && (
+                            <div className="border-t border-line px-6 py-4">
+                                {footer}
+                            </div>
+                        )}
                     </motion.aside>
                 </motion.div>
             )}
