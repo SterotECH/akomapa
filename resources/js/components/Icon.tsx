@@ -23,7 +23,10 @@ export type IconName =
     | 'clock'
     | 'barcode'
     | 'filter'
-    | 'arrow-right';
+    | 'arrow-right'
+    | 'sun'
+    | 'moon'
+    | 'menu';
 
 const paths: Record<IconName, ReactNode> = {
     dashboard: (
@@ -136,6 +139,14 @@ const paths: Record<IconName, ReactNode> = {
     ),
     filter: <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z" />,
     'arrow-right': <path d="M5 12h14M13 6l6 6-6 6" />,
+    sun: (
+        <>
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </>
+    ),
+    moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />,
+    menu: <path d="M4 6h16M4 12h16M4 18h16" />,
 };
 
 export function Icon({

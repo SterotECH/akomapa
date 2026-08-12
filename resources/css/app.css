@@ -15,23 +15,27 @@
     --color-amber-deep: #d49100;
     --color-green: #00ad43;
     --color-green-deep: #00993b;
-    --color-linen: #faf0e6;
-    --color-white: #f5f5f5;
-    --color-line: #eae0cf;
-    --color-raisin: #242124;
-    --color-raisin-soft: #3b363b;
-    --color-spanish-gray: #989898;
     --color-danger: #c13e2f;
     --color-danger-deep: #9e2f22;
 
-    --shadow-card:
-        0 1px 2px rgb(36 33 36 / 0.04), 0 8px 24px rgb(36 33 36 / 0.06);
-    --shadow-raised: 0 12px 32px rgb(36 33 36 / 0.12);
-    --shadow-modal: 0 24px 64px rgb(36 33 36 / 0.24);
+    --color-raisin: var(--ui-raisin);
+    --color-raisin-soft: var(--ui-raisin-soft);
+    --color-linen: var(--ui-linen);
+    --color-white: var(--ui-white);
+    --color-line: var(--ui-line);
+    --color-spanish-gray: var(--ui-muted);
 
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
+    --color-chrome: var(--ui-chrome);
+    --color-chrome-text: var(--ui-chrome-text);
+    --color-amber-ink: var(--ui-amber-ink);
+
+    --shadow-card: var(--ui-shadow-card);
+    --shadow-raised: var(--ui-shadow-raised);
+    --shadow-modal: var(--ui-shadow-modal);
+
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
 
     --transition-duration-fast: 120ms;
 
@@ -64,17 +68,54 @@
     --text-wordmark--font-weight: 700;
 }
 
-@layer base {
-    :root {
-        color-scheme: light;
-    }
+:root {
+    color-scheme: light;
 
+    --ui-raisin: #242124;
+    --ui-raisin-soft: #3b363b;
+    --ui-linen: #faf0e6;
+    --ui-white: #f5f5f5;
+    --ui-line: #eae0cf;
+    --ui-muted: #989898;
+
+    --ui-chrome: #242124;
+    --ui-chrome-text: #f5f5f5;
+    --ui-amber-ink: #242124;
+
+    --ui-shadow-card:
+        0 1px 2px rgb(36 33 36 / 0.04), 0 8px 24px rgb(36 33 36 / 0.06);
+    --ui-shadow-raised: 0 12px 32px rgb(36 33 36 / 0.12);
+    --ui-shadow-modal: 0 24px 64px rgb(36 33 36 / 0.24);
+}
+
+.dark {
+    color-scheme: dark;
+
+    --ui-raisin: #f2ece3;
+    --ui-raisin-soft: #d9d2c7;
+    --ui-linen: #181310;
+    --ui-white: #241f19;
+    --ui-line: #3a332b;
+    --ui-muted: #a49c92;
+
+    --ui-chrome: #191512;
+    --ui-chrome-text: #f5f5f5;
+    --ui-amber-ink: #242124;
+
+    --ui-shadow-card:
+        0 0 0 1px rgb(255 255 255 / 0.04), 0 8px 24px rgb(0 0 0 / 0.45);
+    --ui-shadow-raised:
+        0 0 0 1px rgb(255 255 255 / 0.06), 0 12px 32px rgb(0 0 0 / 0.6);
+    --ui-shadow-modal: 0 24px 64px rgb(0 0 0 / 0.8);
+}
+
+@layer base {
     body {
         @apply bg-linen font-sans text-raisin antialiased;
     }
 
     ::selection {
-        @apply bg-amber text-raisin;
+        @apply bg-amber text-amber-ink;
     }
 
     :focus-visible {

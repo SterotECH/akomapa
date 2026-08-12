@@ -5,7 +5,7 @@ type ButtonVariant = 'primary' | 'plain' | 'danger';
 type ButtonSize = 'sm' | 'md';
 
 const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'bg-amber text-raisin hover:bg-amber-deep',
+    primary: 'bg-amber text-amber-ink hover:bg-amber-deep',
     plain: 'bg-transparent text-raisin hover:bg-raisin/5',
     danger: 'bg-transparent text-danger hover:bg-danger/5',
 };

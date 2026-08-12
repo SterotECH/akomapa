@@ -33,7 +33,7 @@ export function Drawer({ open, onClose, title, children }: DrawerProps) {
         <AnimatePresence>
             {open && (
                 <motion.div
-                    className="fixed inset-0 z-50 bg-raisin/60"
+                    className="fixed inset-0 z-50 bg-chrome/60"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
