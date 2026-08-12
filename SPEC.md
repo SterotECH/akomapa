@@ -64,7 +64,7 @@ V12: ⊥ real data in screenshots; synthetic labeled
 | T2  | x      | AppLayout shell: sidebar/topbar, icons, reduced-motion                                             | V11         |
 | T3  | x      | UI primitives: Button, Input, Badge, Card, Modal/Drawer, Table, EmptyState, Skeleton, format utils | V10         |
 | T4  | x      | Login screen                                                                                       | V1-V12      |
-| T5  | .      | Dashboard screen                                                                                   | V12         |
+| T5  | x      | Dashboard screen                                                                                   | V12         |
 | T6  | .      | POS screen: grid, cart, scan, checkout                                                             | V3,V4,V7,V8 |
 | T7  | .      | Products screen: list/filter, add/edit drawer, deactivate                                          | V1,V2,V8    |
 | T8  | .      | Stock screen: restock, movements, low-stock, adjustment                                            | V3,V5,V6,V8 |

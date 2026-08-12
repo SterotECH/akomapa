@@ -23,7 +23,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
     return (
         <div className="flex min-h-screen">
-            <aside className="app-sidebar fixed inset-y-0 left-0 z-20 flex w-64 flex-col bg-raisin px-4 py-6 text-white">
+            <aside className="app-sidebar fixed inset-y-0 left-0 z-20 hidden w-64 flex-col bg-raisin px-4 py-6 text-white lg:flex">
                 <p className="px-3 text-wordmark text-white">
                     Akomapa{' '}
                     <span className="text-amber">
@@ -69,15 +69,52 @@ export default function AppLayout({ children }: PropsWithChildren) {
                 </div>
             </aside>
 
-            <div className="ml-64 flex min-h-screen flex-1 flex-col">
-                <header className="app-topbar sticky top-0 z-10 flex h-16 items-center justify-between border-b border-line bg-linen/95 px-6">
+            <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-white/10 bg-raisin lg:hidden">
+                {nav.map((item) => {
+                    const isActive = item.href === active.href;
+
+                    return (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            className={cn(
+                                'relative flex min-h-16 flex-1 flex-col items-center justify-center gap-1 transition-colors duration-fast',
+                                isActive
+                                    ? 'text-amber'
+                                    : 'text-white/60 hover:bg-white/5 hover:text-white',
+                            )}
+                        >
+                            {isActive && (
+                                <span className="absolute top-0 h-0.5 w-10 rounded-full bg-amber" />
+                            )}
+                            <Icon name={item.name} className="size-5" />
+                            <span className="text-label">{item.label}</span>
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            <div className="flex min-h-screen flex-1 flex-col pb-16 lg:ml-64 lg:pb-0">
+                <header className="app-topbar sticky top-0 z-10 flex h-16 items-center justify-between gap-3 border-b border-line bg-linen/95 px-4 sm:px-6">
                     <h1 className="text-display text-raisin">{active.label}</h1>
-                    <span className="rounded-full border border-line bg-white px-3 py-1 text-label text-spanish-gray">
-                        Synthetic data
-                    </span>
+
+                    <div className="flex items-center gap-2">
+                        <span className="rounded-full border border-line bg-white px-3 py-1 text-label text-spanish-gray">
+                            Synthetic data
+                        </span>
+                        <Link
+                            href={logout.url()}
+                            method="post"
+                            as="button"
+                            aria-label="Log out"
+                            className="rounded-md p-2 text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-raisin lg:hidden"
+                        >
+                            <Icon name="logout" className="size-5" />
+                        </Link>
+                    </div>
                 </header>
 
-                <main className="flex-1 p-6">{children}</main>
+                <main className="flex-1 p-4 pb-6 sm:p-6">{children}</main>
             </div>
         </div>
     );
