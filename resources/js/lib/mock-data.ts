@@ -393,6 +393,7 @@ const movement = (
     quantity: number,
     minutes: number,
     note: string | null,
+    suffix = '',
 ): StockMovement => {
     const summary: ProductSummary = {
         id: product.id,
@@ -402,7 +403,7 @@ const movement = (
     };
 
     return {
-        id: product.id + type[0].toUpperCase(),
+        id: `${product.id}${type[0].toUpperCase()}${suffix}`,
         product_id: product.id,
         type,
         quantity,
@@ -454,5 +455,92 @@ export const recentMovements: StockMovement[] = [
         20,
         1800,
         'Ice cream van drop',
+    ),
+];
+
+export const stockMovements: StockMovement[] = [
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0E'),
+        'restock',
+        40,
+        25,
+        'Morning delivery',
+    ),
+    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME0C'), 'sale', -12, 45, 'Till sale'),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME09'),
+        'adjustment',
+        -2,
+        60,
+        'Shelf damage',
+    ),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME04'),
+        'sale',
+        6,
+        75,
+        'Voided sale TS-2026-0184',
+        'V',
+    ),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0A'),
+        'restock',
+        24,
+        95,
+        'Weekend order',
+    ),
+    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME0J'), 'sale', -4, 120, 'Till sale'),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0N'),
+        'restock',
+        10,
+        150,
+        'Supplier A delivery',
+    ),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0F'),
+        'adjustment',
+        2,
+        180,
+        'Count correction',
+    ),
+    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME05'), 'sale', -3, 210, 'Till sale'),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0B'),
+        'restock',
+        36,
+        260,
+        'Brewery drop',
+    ),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0C'),
+        'sale',
+        8,
+        300,
+        'Voided sale TS-2026-0171',
+        'V2',
+    ),
+    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME03'), 'sale', -10, 340, 'Till sale'),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0H'),
+        'restock',
+        12,
+        420,
+        'Weekly order',
+    ),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0G'),
+        'adjustment',
+        -3,
+        500,
+        'Damaged packs',
+    ),
+    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME0P'), 'sale', -2, 600, 'Till sale'),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0D'),
+        'restock',
+        30,
+        720,
+        'Distributor delivery',
     ),
 ];
