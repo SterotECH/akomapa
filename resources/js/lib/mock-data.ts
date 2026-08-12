@@ -354,6 +354,31 @@ export const todaySummary = {
     lowStock: lowStockProducts.length,
 };
 
+const DAY_MS = 86_400_000;
+
+export const salesWeek: { label: string; value: number }[] = (() => {
+    const values = [
+        142_400,
+        138_900,
+        151_200,
+        163_800,
+        175_100,
+        190_500,
+        todaySummary.sales,
+    ];
+
+    return values.map((value, index) => {
+        const date = new Date(
+            Date.now() - (values.length - 1 - index) * DAY_MS,
+        );
+
+        return {
+            label: date.toLocaleDateString('en-GH', { weekday: 'short' }),
+            value,
+        };
+    });
+})();
+
 const minutesAgo = (minutes: number) =>
     new Date(Date.now() - minutes * 60_000).toISOString();
 
@@ -387,12 +412,42 @@ const byId = (id: string): Product =>
     products.find((product) => product.id === id) as Product;
 
 export const recentMovements: StockMovement[] = [
-    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME0A'), 'restock', 24, 180, 'Weekend order'),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0A'),
+        'restock',
+        24,
+        180,
+        'Weekend order',
+    ),
     movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME04'), 'sale', -6, 120, 'Till sale'),
-    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME0E'), 'restock', 40, 300, 'Morning delivery'),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0E'),
+        'restock',
+        40,
+        300,
+        'Morning delivery',
+    ),
     movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME0C'), 'sale', -12, 240, 'Till sale'),
-    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME09'), 'adjustment', -2, 480, 'Shelf damage'),
-    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME0N'), 'restock', 10, 1560, 'Supplier A delivery'),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME09'),
+        'adjustment',
+        -2,
+        480,
+        'Shelf damage',
+    ),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME0N'),
+        'restock',
+        10,
+        1560,
+        'Supplier A delivery',
+    ),
     movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME0J'), 'sale', -4, 420, 'Till sale'),
-    movement(byId('01KZSJQXP29WW1E3W5Q7Y6ME03'), 'restock', 20, 1800, 'Ice cream van drop'),
+    movement(
+        byId('01KZSJQXP29WW1E3W5Q7Y6ME03'),
+        'restock',
+        20,
+        1800,
+        'Ice cream van drop',
+    ),
 ];
