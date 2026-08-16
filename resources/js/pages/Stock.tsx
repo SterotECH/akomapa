@@ -5,6 +5,7 @@ import type { FormEvent } from 'react';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { Drawer } from '@/components/Drawer';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { Input } from '@/components/Input';
@@ -70,12 +71,35 @@ function dateToIso(date: string): string {
     return new Date(`${date}T12:00:00`).toISOString();
 }
 
+function suggestedQuantity(product: Product): number {
+    return Math.max(product.reorder_threshold - product.stock_on_hand, 1);
+}
+
 function movementSummary(product: Product): StockMovement['product'] {
     return {
         id: product.id,
         sku: product.sku,
         name: product.name,
         unit: product.unit,
+    };
+}
+
+function buildMovement(
+    product: Product,
+    type: MovementType,
+    quantity: number,
+    note: string | null,
+    occurredAt: string,
+): StockMovement {
+    return {
+        id: createMockId(),
+        product_id: product.id,
+        type,
+        quantity,
+        occurred_at: occurredAt,
+        note,
+        sale_id: null,
+        product: movementSummary(product),
     };
 }
 
@@ -87,16 +111,11 @@ export default function Stock({
     const { toasts, push, dismiss } = useToasts();
     const [catalog, setCatalog] = useState(initialProducts);
     const [movements, setMovements] = useState(initialMovements);
-    const [pickerProductId, setPickerProductId] = useState('');
-    const [pickerQuantity, setPickerQuantity] = useState('1');
-    const [lines, setLines] = useState<RestockLine[]>([]);
-    const [note, setNote] = useState('');
-    const [date, setDate] = useState(todayInput);
-    const [adjustProductId, setAdjustProductId] = useState('');
-    const [adjustQuantity, setAdjustQuantity] = useState('');
-    const [reason, setReason] = useState('');
-    const [adjustError, setAdjustError] = useState<string | null>(null);
     const [movementFilter, setMovementFilter] = useState('');
+    const [restockOpen, setRestockOpen] = useState(false);
+    const [restockPresetId, setRestockPresetId] = useState<string | null>(null);
+    const [adjustOpen, setAdjustOpen] = useState(false);
+    const [lowStockOpen, setLowStockOpen] = useState(false);
 
     const lowStock = useMemo(
         () => catalog.filter((product) => product.is_low_stock),
@@ -112,19 +131,6 @@ export default function Stock({
             (movement) => movement.product_id === movementFilter,
         );
     }, [movements, movementFilter]);
-
-    const totalValue = useMemo(
-        () =>
-            lines.reduce(
-                (sum, line) => sum + line.product.cost_price * line.quantity,
-                0,
-            ),
-        [lines],
-    );
-
-    function suggestedQuantity(product: Product): number {
-        return Math.max(product.reorder_threshold - product.stock_on_hand, 1);
-    }
 
     function changeStock(productId: string, delta: number) {
         setCatalog((items) =>
@@ -146,154 +152,67 @@ export default function Stock({
         );
     }
 
-    function handleAddLine() {
-        const quantity = Number.parseInt(pickerQuantity, 10);
-
-        if (pickerProductId.length === 0) {
-            push('Pick a product to receive', 'warning');
-
-            return;
-        }
-
-        if (!Number.isInteger(quantity) || quantity < 1) {
-            push('Quantity must be at least 1', 'warning');
-
-            return;
-        }
-
-        const product = catalog.find((item) => item.id === pickerProductId);
-
-        if (product === undefined) {
-            return;
-        }
-
-        setLines((current) => {
-            const existing = current.find(
-                (line) => line.product.id === product.id,
-            );
-
-            if (existing) {
-                return current.map((line) =>
-                    line.product.id === product.id
-                        ? { ...line, quantity: line.quantity + quantity }
-                        : line,
-                );
-            }
-
-            return [...current, { product, quantity }];
-        });
-        setPickerProductId('');
-        setPickerQuantity('1');
+    function openRestock(presetId: string | null) {
+        setRestockPresetId(presetId);
+        setRestockOpen(true);
     }
 
-    function removeLine(productId: string) {
-        setLines((current) =>
-            current.filter((line) => line.product.id !== productId),
-        );
-    }
-
-    function shortcutRestock(product: Product) {
-        if (lines.some((line) => line.product.id === product.id)) {
-            push(`${product.name} is already on the receive list`, 'warning');
-
-            return;
-        }
-
-        setLines((current) => [
-            ...current,
-            { product, quantity: suggestedQuantity(product) },
-        ]);
-        push(`Added ${product.name} to receive`, 'success');
-    }
-
-    function submitRestock() {
+    function submitRestock(lines: RestockLine[], note: string, date: string) {
         if (lines.length === 0) {
             return;
         }
 
         const noteText = note.trim() || null;
         const occurredAt = dateToIso(date);
+        const totalValue = lines.reduce(
+            (sum, line) => sum + line.product.cost_price * line.quantity,
+            0,
+        );
 
         lines.forEach((line) => {
             changeStock(line.product.id, line.quantity);
             setMovements((current) => [
-                {
-                    id: createMockId(),
-                    product_id: line.product.id,
-                    type: 'restock',
-                    quantity: line.quantity,
-                    occurred_at: occurredAt,
-                    note: noteText,
-                    sale_id: null,
-                    product: movementSummary(line.product),
-                },
+                buildMovement(
+                    line.product,
+                    'restock',
+                    line.quantity,
+                    noteText,
+                    occurredAt,
+                ),
                 ...current,
             ]);
         });
 
-        setLines([]);
-        setNote('');
+        setRestockOpen(false);
         push(
             `Received ${lines.length} item${lines.length === 1 ? '' : 's'} · ${formatGhs(totalValue)}`,
             'success',
         );
     }
 
-    function submitAdjustment(event: FormEvent) {
-        event.preventDefault();
-
-        const product = catalog.find((item) => item.id === adjustProductId);
-        const quantity = Number.parseInt(adjustQuantity, 10);
+    function submitAdjustment(
+        productId: string,
+        quantity: number,
+        reason: string,
+    ) {
+        const product = catalog.find((item) => item.id === productId);
 
         if (product === undefined) {
-            setAdjustError('Pick a product to adjust');
-
-            return;
-        }
-
-        if (!Number.isInteger(quantity) || quantity === 0) {
-            setAdjustError('Enter a whole number, and not zero');
-
-            return;
-        }
-
-        const reasonText = reason.trim();
-
-        if (reasonText.length === 0) {
-            setAdjustError('Add a reason for the adjustment');
-
-            return;
-        }
-
-        const nextStock = product.stock_on_hand + quantity;
-
-        if (nextStock < 0) {
-            setAdjustError(
-                `Only ${product.stock_on_hand} ${product.unit} on hand — cannot go below zero`,
-            );
-            push('Adjustment would take stock below zero', 'danger');
-
             return;
         }
 
         changeStock(product.id, quantity);
         setMovements((current) => [
-            {
-                id: createMockId(),
-                product_id: product.id,
-                type: 'adjustment',
+            buildMovement(
+                product,
+                'adjustment',
                 quantity,
-                occurred_at: new Date().toISOString(),
-                note: reasonText,
-                sale_id: null,
-                product: movementSummary(product),
-            },
+                reason,
+                new Date().toISOString(),
+            ),
             ...current,
         ]);
-        setAdjustProductId('');
-        setAdjustQuantity('');
-        setReason('');
-        setAdjustError(null);
+        setAdjustOpen(false);
         push(
             `Adjusted ${product.name} by ${formatSignedQuantity(quantity)}`,
             'success',
@@ -310,293 +229,38 @@ export default function Stock({
                 animate={{ opacity: 1, y: 0 }}
                 transition={gentle}
             >
-                <Card>
-                    <div className="flex items-center gap-2 border-b border-line px-5 py-4">
-                        <h2 className="text-headline text-raisin">Low stock</h2>
-                        <Badge variant="amber">
-                            {lowStock.length.toLocaleString('en-GH')}
-                        </Badge>
-                    </div>
-
-                    {lowStock.length > 0 ? (
-                        <ul className="divide-y divide-line">
-                            {lowStock.map((product) => (
-                                <li
-                                    key={product.id}
-                                    className="flex items-center gap-3 px-5 py-3"
-                                >
-                                    <StockDot low />
-                                    <div className="min-w-0 flex-1">
-                                        <p className="truncate text-title text-raisin">
-                                            {product.name}
-                                        </p>
-                                        <p className="text-label text-spanish-gray">
-                                            Reorder at{' '}
-                                            {product.reorder_threshold}{' '}
-                                            {product.unit}
-                                        </p>
-                                    </div>
-                                    <span className="text-figure font-semibold text-amber-deep tabular-nums">
-                                        {product.stock_on_hand.toLocaleString(
-                                            'en-GH',
-                                        )}{' '}
-                                        left
-                                    </span>
-                                    <Button
-                                        variant="plain"
-                                        size="sm"
-                                        onClick={() => shortcutRestock(product)}
-                                    >
-                                        <Icon
-                                            name="plus"
-                                            className="size-3.5"
-                                        />
-                                        Restock
-                                    </Button>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <div className="px-5 py-10 text-center">
-                            <p className="text-body text-spanish-gray">
-                                Nothing running low. Every item is well stocked.
-                            </p>
-                        </div>
-                    )}
-                </Card>
-
-                <div className="grid gap-6 lg:grid-cols-3">
-                    <Card className="lg:col-span-2">
-                        <div className="border-b border-line px-5 py-4">
-                            <h2 className="text-headline text-raisin">
-                                Receive stock
-                            </h2>
-                        </div>
-
-                        <div className="space-y-4 p-5">
-                            <div className="flex flex-col gap-2 sm:flex-row">
-                                <select
-                                    value={pickerProductId}
-                                    onChange={(event) =>
-                                        setPickerProductId(event.target.value)
-                                    }
-                                    aria-label="Product to receive"
-                                    className="w-full flex-1 rounded-sm border border-line bg-white px-3 py-2.5 text-body text-raisin transition-shadow duration-fast outline-none focus:ring-2 focus:ring-amber"
-                                >
-                                    <option value="">Pick a product…</option>
-                                    {catalog.map((product) => (
-                                        <option
-                                            key={product.id}
-                                            value={product.id}
-                                        >
-                                            {product.name} ({product.sku})
-                                        </option>
-                                    ))}
-                                </select>
-                                <Input
-                                    type="number"
-                                    inputMode="numeric"
-                                    min={1}
-                                    step={1}
-                                    value={pickerQuantity}
-                                    onChange={(event) =>
-                                        setPickerQuantity(event.target.value)
-                                    }
-                                    aria-label="Quantity to receive"
-                                    className="sm:w-24"
-                                />
-                                <Button variant="plain" onClick={handleAddLine}>
-                                    <Icon name="plus" className="size-4" />
-                                    Add line
-                                </Button>
-                            </div>
-
-                            {lines.length > 0 ? (
-                                <ul className="divide-y divide-line rounded-md border border-line bg-white">
-                                    {lines.map((line) => (
-                                        <li
-                                            key={line.product.id}
-                                            className="flex items-center gap-3 px-4 py-2.5"
-                                        >
-                                            <div className="min-w-0 flex-1">
-                                                <p className="truncate text-title text-raisin">
-                                                    {line.product.name}
-                                                </p>
-                                                <p className="text-label text-spanish-gray">
-                                                    {line.quantity} ×{' '}
-                                                    {line.product.unit}
-                                                </p>
-                                            </div>
-                                            <Money
-                                                pesewas={
-                                                    line.product.cost_price *
-                                                    line.quantity
-                                                }
-                                                className="text-raisin"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    removeLine(line.product.id)
-                                                }
-                                                aria-label={`Remove ${line.product.name} from receive list`}
-                                                className="rounded-md p-1 text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-danger"
-                                            >
-                                                <Icon
-                                                    name="close"
-                                                    className="size-4"
-                                                />
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-body text-spanish-gray">
-                                    Pick a product and quantity, then add it.
-                                </p>
-                            )}
-
-                            <div className="flex flex-col gap-2 sm:flex-row">
-                                <Input
-                                    type="text"
-                                    value={note}
-                                    onChange={(event) =>
-                                        setNote(event.target.value)
-                                    }
-                                    placeholder="Supplier note (optional)"
-                                    aria-label="Supplier note"
-                                    className="flex-1"
-                                />
-                                <Input
-                                    type="date"
-                                    value={date}
-                                    onChange={(event) =>
-                                        setDate(event.target.value)
-                                    }
-                                    aria-label="Received on"
-                                    className="sm:w-44"
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
-                                <div className="flex items-baseline gap-1.5">
-                                    <span className="text-label tracking-wide text-spanish-gray uppercase">
-                                        Value
-                                    </span>
-                                    <Money
-                                        pesewas={totalValue}
-                                        className="text-headline text-raisin"
-                                    />
-                                </div>
-                                <Button
-                                    disabled={lines.length === 0}
-                                    onClick={submitRestock}
-                                >
-                                    <Icon name="check" className="size-4" />
-                                    Receive stock
-                                </Button>
-                            </div>
-                        </div>
-                    </Card>
-
-                    <Card>
-                        <div className="border-b border-line px-5 py-4">
-                            <h2 className="text-headline text-raisin">
-                                Record adjustment
-                            </h2>
-                        </div>
-
-                        <form
-                            onSubmit={submitAdjustment}
-                            className="space-y-4 p-5"
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-body text-spanish-gray">
+                        Restock the shelves, fix counts, and track every
+                        movement.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            variant="plain"
+                            onClick={() => setLowStockOpen(true)}
                         >
-                            <div>
-                                <label
-                                    htmlFor="adjust-product"
-                                    className="mb-1.5 block text-label font-medium text-raisin"
-                                >
-                                    Product
-                                </label>
-                                <select
-                                    id="adjust-product"
-                                    value={adjustProductId}
-                                    onChange={(event) => {
-                                        setAdjustProductId(event.target.value);
-                                        setAdjustError(null);
-                                    }}
-                                    className="w-full rounded-sm border border-line bg-white px-3 py-2.5 text-body text-raisin transition-shadow duration-fast outline-none focus:ring-2 focus:ring-amber"
-                                >
-                                    <option value="">Pick a product…</option>
-                                    {catalog.map((product) => (
-                                        <option
-                                            key={product.id}
-                                            value={product.id}
-                                        >
-                                            {product.name} ({product.sku})
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label
-                                    htmlFor="adjust-quantity"
-                                    className="mb-1.5 block text-label font-medium text-raisin"
-                                >
-                                    Quantity
-                                </label>
-                                <Input
-                                    id="adjust-quantity"
-                                    type="number"
-                                    inputMode="numeric"
-                                    step={1}
-                                    value={adjustQuantity}
-                                    onChange={(event) => {
-                                        setAdjustQuantity(event.target.value);
-                                        setAdjustError(null);
-                                    }}
-                                    placeholder="e.g. -2"
-                                />
-                                <p className="mt-1.5 text-label text-spanish-gray">
-                                    Use a minus for stock out (breakage, count
-                                    errors).
-                                </p>
-                            </div>
-
-                            <div>
-                                <label
-                                    htmlFor="adjust-reason"
-                                    className="mb-1.5 block text-label font-medium text-raisin"
-                                >
-                                    Reason
-                                </label>
-                                <Input
-                                    id="adjust-reason"
-                                    type="text"
-                                    value={reason}
-                                    onChange={(event) => {
-                                        setReason(event.target.value);
-                                        setAdjustError(null);
-                                    }}
-                                    placeholder="e.g. Shelf damage"
-                                />
-                            </div>
-
-                            {adjustError && (
-                                <p className="text-label text-danger">
-                                    {adjustError}
-                                </p>
+                            <Icon
+                                name="warning"
+                                className="size-4 text-amber-deep"
+                            />
+                            Low stock
+                            {lowStock.length > 0 && (
+                                <Badge variant="amber">
+                                    {lowStock.length.toLocaleString('en-GH')}
+                                </Badge>
                             )}
-
-                            <Button
-                                variant="plain"
-                                type="submit"
-                                className="w-full"
-                            >
-                                Record adjustment
-                            </Button>
-                        </form>
-                    </Card>
+                        </Button>
+                        <Button
+                            variant="plain"
+                            onClick={() => setAdjustOpen(true)}
+                        >
+                            Adjust stock
+                        </Button>
+                        <Button onClick={() => openRestock(null)}>
+                            <Icon name="plus" className="size-4" />
+                            Receive stock
+                        </Button>
+                    </div>
                 </div>
 
                 <Card>
@@ -699,7 +363,465 @@ export default function Stock({
                 </Card>
             </motion.div>
 
+            <LowStockDrawer
+                open={lowStockOpen}
+                onClose={() => setLowStockOpen(false)}
+                products={lowStock}
+                onRestock={(productId) => {
+                    setLowStockOpen(false);
+                    openRestock(productId);
+                }}
+            />
+
+            <RestockDrawer
+                open={restockOpen}
+                onClose={() => setRestockOpen(false)}
+                catalog={catalog}
+                presetId={restockPresetId}
+                onSubmit={submitRestock}
+                notify={push}
+            />
+
+            <AdjustmentDrawer
+                open={adjustOpen}
+                onClose={() => setAdjustOpen(false)}
+                catalog={catalog}
+                onSubmit={submitAdjustment}
+                notify={push}
+            />
+
             <ToastStack toasts={toasts} onDismiss={dismiss} />
         </>
+    );
+}
+
+function LowStockDrawer({
+    open,
+    onClose,
+    products,
+    onRestock,
+}: {
+    open: boolean;
+    onClose: () => void;
+    products: Product[];
+    onRestock: (productId: string) => void;
+}) {
+    return (
+        <Drawer open={open} onClose={onClose} title="Low stock">
+            <div className="space-y-4">
+                <div className="flex items-baseline gap-2">
+                    <span className="text-display text-amber-deep tabular-nums">
+                        {products.length.toLocaleString('en-GH')}
+                    </span>
+                    <span className="text-label font-medium text-spanish-gray">
+                        {products.length === 1 ? 'product' : 'products'} running
+                        low
+                    </span>
+                </div>
+
+                {products.length > 0 ? (
+                    <ul className="divide-y divide-line rounded-md border border-line bg-white">
+                        {products.map((product) => (
+                            <li
+                                key={product.id}
+                                className="flex items-center gap-3 px-4 py-3"
+                            >
+                                <StockDot low />
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-title text-raisin">
+                                        {product.name}
+                                    </p>
+                                    <p className="text-label text-spanish-gray">
+                                        Reorder at {product.reorder_threshold}{' '}
+                                        {product.unit}
+                                    </p>
+                                </div>
+                                <span className="text-figure font-semibold text-amber-deep tabular-nums">
+                                    {product.stock_on_hand.toLocaleString(
+                                        'en-GH',
+                                    )}{' '}
+                                    left
+                                </span>
+                                <Button
+                                    variant="plain"
+                                    size="sm"
+                                    onClick={() => onRestock(product.id)}
+                                >
+                                    <Icon name="plus" className="size-3.5" />
+                                    Restock
+                                </Button>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-body text-spanish-gray">
+                        Nothing running low. Every item is well stocked.
+                    </p>
+                )}
+            </div>
+        </Drawer>
+    );
+}
+
+function RestockDrawer({
+    open,
+    onClose,
+    catalog,
+    presetId,
+    onSubmit,
+    notify,
+}: {
+    open: boolean;
+    onClose: () => void;
+    catalog: Product[];
+    presetId: string | null;
+    onSubmit: (lines: RestockLine[], note: string, date: string) => void;
+    notify: (message: string, tone: 'success' | 'warning' | 'danger') => void;
+}) {
+    const [pickerProductId, setPickerProductId] = useState('');
+    const [pickerQuantity, setPickerQuantity] = useState('1');
+    const [lines, setLines] = useState<RestockLine[]>(() => {
+        if (presetId === null) {
+            return [];
+        }
+
+        const product = catalog.find((item) => item.id === presetId);
+
+        if (product === undefined) {
+            return [];
+        }
+
+        return [{ product, quantity: suggestedQuantity(product) }];
+    });
+    const [note, setNote] = useState('');
+    const [date, setDate] = useState(todayInput);
+
+    const totalValue = useMemo(
+        () =>
+            lines.reduce(
+                (sum, line) => sum + line.product.cost_price * line.quantity,
+                0,
+            ),
+        [lines],
+    );
+
+    function handleAddLine() {
+        const quantity = Number.parseInt(pickerQuantity, 10);
+
+        if (pickerProductId.length === 0) {
+            notify('Pick a product to receive', 'warning');
+
+            return;
+        }
+
+        if (!Number.isInteger(quantity) || quantity < 1) {
+            notify('Quantity must be at least 1', 'warning');
+
+            return;
+        }
+
+        const product = catalog.find((item) => item.id === pickerProductId);
+
+        if (product === undefined) {
+            return;
+        }
+
+        setLines((current) => {
+            const existing = current.find(
+                (line) => line.product.id === product.id,
+            );
+
+            if (existing) {
+                return current.map((line) =>
+                    line.product.id === product.id
+                        ? { ...line, quantity: line.quantity + quantity }
+                        : line,
+                );
+            }
+
+            return [...current, { product, quantity }];
+        });
+        setPickerProductId('');
+        setPickerQuantity('1');
+    }
+
+    function removeLine(productId: string) {
+        setLines((current) =>
+            current.filter((line) => line.product.id !== productId),
+        );
+    }
+
+    return (
+        <Drawer
+            open={open}
+            onClose={onClose}
+            title="Receive stock"
+            footer={
+                <div className="space-y-3">
+                    <div className="flex items-baseline justify-between">
+                        <span className="text-label tracking-wide text-spanish-gray uppercase">
+                            Value
+                        </span>
+                        <Money
+                            pesewas={totalValue}
+                            className="text-headline text-raisin"
+                        />
+                    </div>
+                    <Button
+                        className="w-full"
+                        disabled={lines.length === 0}
+                        onClick={() => onSubmit(lines, note, date)}
+                    >
+                        <Icon name="check" className="size-4" />
+                        Receive stock
+                    </Button>
+                </div>
+            }
+        >
+            <div className="space-y-4">
+                <div className="flex flex-col gap-2">
+                    <select
+                        value={pickerProductId}
+                        onChange={(event) =>
+                            setPickerProductId(event.target.value)
+                        }
+                        aria-label="Product to receive"
+                        className="w-full rounded-sm border border-line bg-white px-3 py-2.5 text-body text-raisin transition-shadow duration-fast outline-none focus:ring-2 focus:ring-amber"
+                    >
+                        <option value="">Pick a product…</option>
+                        {catalog.map((product) => (
+                            <option key={product.id} value={product.id}>
+                                {product.name} ({product.sku})
+                            </option>
+                        ))}
+                    </select>
+                    <div className="flex gap-2">
+                        <Input
+                            type="number"
+                            inputMode="numeric"
+                            min={1}
+                            step={1}
+                            value={pickerQuantity}
+                            onChange={(event) =>
+                                setPickerQuantity(event.target.value)
+                            }
+                            aria-label="Quantity to receive"
+                            className="flex-1"
+                        />
+                        <Button variant="plain" onClick={handleAddLine}>
+                            <Icon name="plus" className="size-4" />
+                            Add line
+                        </Button>
+                    </div>
+                </div>
+
+                {lines.length > 0 ? (
+                    <ul className="divide-y divide-line rounded-md border border-line bg-white">
+                        {lines.map((line) => (
+                            <li
+                                key={line.product.id}
+                                className="flex items-center gap-3 px-4 py-2.5"
+                            >
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-title text-raisin">
+                                        {line.product.name}
+                                    </p>
+                                    <p className="text-label text-spanish-gray">
+                                        {line.quantity} × {line.product.unit}
+                                    </p>
+                                </div>
+                                <Money
+                                    pesewas={
+                                        line.product.cost_price * line.quantity
+                                    }
+                                    className="text-raisin"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeLine(line.product.id)}
+                                    aria-label={`Remove ${line.product.name} from receive list`}
+                                    className="rounded-md p-1 text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-danger"
+                                >
+                                    <Icon name="close" className="size-4" />
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-body text-spanish-gray">
+                        Pick a product and quantity, then add it.
+                    </p>
+                )}
+
+                <div className="space-y-2">
+                    <Input
+                        type="text"
+                        value={note}
+                        onChange={(event) => setNote(event.target.value)}
+                        placeholder="Supplier note (optional)"
+                        aria-label="Supplier note"
+                    />
+                    <Input
+                        type="date"
+                        value={date}
+                        onChange={(event) => setDate(event.target.value)}
+                        aria-label="Received on"
+                    />
+                </div>
+            </div>
+        </Drawer>
+    );
+}
+
+function AdjustmentDrawer({
+    open,
+    onClose,
+    catalog,
+    onSubmit,
+    notify,
+}: {
+    open: boolean;
+    onClose: () => void;
+    catalog: Product[];
+    onSubmit: (productId: string, quantity: number, reason: string) => void;
+    notify: (message: string, tone: 'success' | 'warning' | 'danger') => void;
+}) {
+    const [productId, setProductId] = useState('');
+    const [quantity, setQuantity] = useState('');
+    const [reason, setReason] = useState('');
+    const [error, setError] = useState<string | null>(null);
+
+    function handleSubmit(event: FormEvent) {
+        event.preventDefault();
+
+        const product = catalog.find((item) => item.id === productId);
+        const parsedQuantity = Number.parseInt(quantity, 10);
+
+        if (product === undefined) {
+            setError('Pick a product to adjust');
+
+            return;
+        }
+
+        if (!Number.isInteger(parsedQuantity) || parsedQuantity === 0) {
+            setError('Enter a whole number, and not zero');
+
+            return;
+        }
+
+        const reasonText = reason.trim();
+
+        if (reasonText.length === 0) {
+            setError('Add a reason for the adjustment');
+
+            return;
+        }
+
+        const nextStock = product.stock_on_hand + parsedQuantity;
+
+        if (nextStock < 0) {
+            setError(
+                `Only ${product.stock_on_hand} ${product.unit} on hand — cannot go below zero`,
+            );
+            notify('Adjustment would take stock below zero', 'danger');
+
+            return;
+        }
+
+        onSubmit(product.id, parsedQuantity, reasonText);
+    }
+
+    return (
+        <Drawer
+            open={open}
+            onClose={onClose}
+            title="Record adjustment"
+            footer={
+                <div className="flex justify-end gap-2">
+                    <Button variant="plain" onClick={onClose}>
+                        Cancel
+                    </Button>
+                    <Button type="submit" form="adjustment-form">
+                        Record adjustment
+                    </Button>
+                </div>
+            }
+        >
+            <form
+                id="adjustment-form"
+                onSubmit={handleSubmit}
+                className="space-y-4"
+            >
+                <div>
+                    <label
+                        htmlFor="adjust-product"
+                        className="mb-1.5 block text-label font-medium text-raisin"
+                    >
+                        Product
+                    </label>
+                    <select
+                        id="adjust-product"
+                        value={productId}
+                        onChange={(event) => {
+                            setProductId(event.target.value);
+                            setError(null);
+                        }}
+                        className="w-full rounded-sm border border-line bg-white px-3 py-2.5 text-body text-raisin transition-shadow duration-fast outline-none focus:ring-2 focus:ring-amber"
+                    >
+                        <option value="">Pick a product…</option>
+                        {catalog.map((product) => (
+                            <option key={product.id} value={product.id}>
+                                {product.name} ({product.sku})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label
+                        htmlFor="adjust-quantity"
+                        className="mb-1.5 block text-label font-medium text-raisin"
+                    >
+                        Quantity
+                    </label>
+                    <Input
+                        id="adjust-quantity"
+                        type="number"
+                        inputMode="numeric"
+                        step={1}
+                        value={quantity}
+                        onChange={(event) => {
+                            setQuantity(event.target.value);
+                            setError(null);
+                        }}
+                        placeholder="e.g. -2"
+                    />
+                    <p className="mt-1.5 text-label text-spanish-gray">
+                        Use a minus for stock out (breakage, count errors).
+                    </p>
+                </div>
+
+                <div>
+                    <label
+                        htmlFor="adjust-reason"
+                        className="mb-1.5 block text-label font-medium text-raisin"
+                    >
+                        Reason
+                    </label>
+                    <Input
+                        id="adjust-reason"
+                        type="text"
+                        value={reason}
+                        onChange={(event) => {
+                            setReason(event.target.value);
+                            setError(null);
+                        }}
+                        placeholder="e.g. Shelf damage"
+                    />
+                </div>
+
+                {error && <p className="text-label text-danger">{error}</p>}
+            </form>
+        </Drawer>
     );
 }
