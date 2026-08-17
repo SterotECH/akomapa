@@ -21,6 +21,7 @@ import {
 import { ToastStack, useToasts } from '@/components/Toast';
 import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
+import { store as productsStore, update as productsUpdate, deactivate as productsDeactivate } from '@/routes/products';
 import type { Category, Product } from '@/types';
 
 type ProductsPageProps = {
@@ -208,7 +209,7 @@ export default function Products({
 
     function saveProduct(payload: ProductPayload) {
         if (drawer.product) {
-            router.patch(route('products.update', drawer.product.id), {
+            router.patch(productsUpdate.url(drawer.product.id), {
                 ...payload,
                 category_id: payload.categoryId || null,
             }, {
@@ -219,7 +220,7 @@ export default function Products({
                 },
             });
         } else {
-            router.post(route('products.store'), {
+            router.post(productsStore.url(), {
                 ...payload,
                 category_id: payload.categoryId || null,
             }, {
@@ -236,7 +237,7 @@ export default function Products({
         if (pendingDeactivate === null) return;
 
         router.patch(
-            route('products.deactivate', pendingDeactivate.id),
+            productsDeactivate.url(pendingDeactivate.id),
             {},
             {
                 preserveScroll: true,
@@ -250,7 +251,7 @@ export default function Products({
 
     function reactivate(product: Product) {
         router.patch(
-            route('products.update', product.id),
+            productsUpdate.url(product.id),
             { is_active: true },
             {
                 preserveScroll: true,

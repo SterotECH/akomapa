@@ -22,6 +22,7 @@ import { ToastStack, useToasts } from '@/components/Toast';
 import { formatGhs, formatSignedQuantity, formatWhen } from '@/lib/format';
 import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
+import { restock as stockRestock, adjustments as stockAdjustments } from '@/routes/stock';
 import type { MovementType, Product, StockMovement } from '@/types';
 
 const movementBadge: Record<
@@ -103,7 +104,7 @@ export default function Stock({
         if (lines.length === 0) return;
 
         router.post(
-            route('stock.restock'),
+            stockRestock.url(),
             {
                 items: lines.map((line) => ({
                     product_id: line.product.id,
@@ -131,7 +132,7 @@ export default function Stock({
         reason: string,
     ) {
         router.post(
-            route('stock.adjustments'),
+            stockAdjustments.url(),
             {
                 items: [{ product_id: productId, quantity }],
                 note: reason.trim() || null,
