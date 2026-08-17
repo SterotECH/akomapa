@@ -1,4 +1,5 @@
 import type {
+    CSSProperties,
     HTMLAttributes,
     PropsWithChildren,
     ThHTMLAttributes,
@@ -8,23 +9,50 @@ import { cn } from '@/lib/utils';
 
 type Align = 'left' | 'right' | 'center';
 
+type ColumnWidth = number | string;
+
 export function DataTable({
     className,
     stickyHeader = false,
+    columns,
+    children,
     ...props
 }: PropsWithChildren<HTMLAttributes<HTMLTableElement>> & {
     stickyHeader?: boolean;
+    columns?: ColumnWidth[];
 }) {
+    const style: CSSProperties = columns
+        ? { tableLayout: 'fixed', width: '100%' }
+        : {};
+
     return (
         <div className="w-full overflow-x-auto">
             <table
                 className={cn(
-                    'w-full border-collapse text-body',
+                    'border-collapse text-body',
                     stickyHeader && '[&>thead]:sticky [&>thead]:top-0 [&>thead]:z-10',
                     className,
                 )}
+                style={style}
                 {...props}
-            />
+            >
+                {columns && (
+                    <colgroup>
+                        {columns.map((width, index) => (
+                            <col
+                                key={index}
+                                style={{
+                                    width:
+                                        typeof width === 'number'
+                                            ? `${width}%`
+                                            : width,
+                                }}
+                            />
+                        ))}
+                    </colgroup>
+                )}
+                {children}
+            </table>
         </div>
     );
 }

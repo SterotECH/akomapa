@@ -215,22 +215,22 @@ export default function Stock({
                     </div>
 
                     {filteredMovements.length > 0 ? (
-                        <DataTable stickyHeader>
+                        <DataTable stickyHeader columns={[40, 22, 10, 14, 14]}>
                             <TableHead>
                                 <TableRow>
                                     <HeaderCell>Product</HeaderCell>
                                     <HeaderCell>Type</HeaderCell>
                                     <HeaderCell align="right">Qty</HeaderCell>
-                                    <HeaderCell className="hidden lg:table-cell">When</HeaderCell>
-                                    <HeaderCell className="hidden lg:table-cell">Note</HeaderCell>
+                                    <HeaderCell>When</HeaderCell>
+                                    <HeaderCell>Note</HeaderCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {filteredMovements.map((movement) => (
                                     <TableRow key={movement.id}>
-                                        <Cell className="max-w-48 min-w-0">
+                                        <Cell className="min-w-0">
                                             <p className="truncate text-title text-raisin">
-                                                {movement.product?.name}
+                                                {movement.product?.name ?? '—'}
                                             </p>
                                             <p className="text-label text-spanish-gray">
                                                 {movement.product?.sku}
@@ -252,10 +252,10 @@ export default function Stock({
                                         >
                                             {formatSignedQuantity(movement.quantity)}
                                         </Cell>
-                                        <Cell className="hidden text-spanish-gray lg:table-cell">
+                                        <Cell className="text-spanish-gray">
                                             {formatWhen(movement.occurred_at)}
                                         </Cell>
-                                        <Cell className="hidden max-w-48 truncate text-spanish-gray lg:table-cell">
+                                        <Cell className="truncate text-spanish-gray">
                                             {movement.note ?? '—'}
                                         </Cell>
                                     </TableRow>
