@@ -102,15 +102,15 @@ Reference: SRS v0.2, `spec/interfaces/*.md`, `spec/features/*.md`.
 
 | id   | status | task                                                                 | cites                          |
 | ---- | ------ | -------------------------------------------------------------------- | ------------------------------ |
-| BT9  | .      | ProductsController: index (real data), store, update, deactivate     | http-routes.md §3, FR-1.1     |
-| BT10 | .      | StockController: index (real data), restock, adjustments             | http-routes.md §4, FR-2.1     |
-| BT11 | .      | PosController: index (active products + categories + today_sales)    | http-routes.md §2, FR-3.1     |
-| BT12 | .      | SalesController: store (complete sale with line items, decrement stock) | http-routes.md §2, FR-3.4, V4 |
-| BT13 | .      | SalesController: void (same-day only, restore stock)                 | http-routes.md §2, FR-3.5, V5 |
-| BT14 | .      | DashboardController: index (today summary + recent movements + low stock) | SRS §3.4, screen signatures   |
-| BT15 | .      | ReportsController: stock-levels, low-stock, sales reports            | http-routes.md §5, report-contracts.md |
-| BT16 | .      | Stock movement ledger: auto-create movement rows on sale/restock/adjust | V5, V6, FR-2.5                |
-| BT17 | .      | Over-sell guard: DB-level check + controller validation (NFR-3)     | SRS NFR-3, V4                 |
+| BT9  | x      | ProductsController: index (real data), store, update, deactivate     | http-routes.md §3, FR-1.1     |
+| BT10 | x      | StockController: index (real data), restock, adjustments             | http-routes.md §4, FR-2.1     |
+| BT11 | x      | PosController: index (active products + categories + today_sales)    | http-routes.md §2, FR-3.1     |
+| BT12 | x      | SalesController: store (complete sale with line items, decrement stock) | http-routes.md §2, FR-3.4, V4 |
+| BT13 | x      | SalesController: void (same-day only, restore stock)                 | http-routes.md §2, FR-3.5, V5 |
+| BT14 | x      | DashboardController: index (today summary + recent movements + low stock) | SRS §3.4, screen signatures   |
+| BT15 | x      | ReportsController: stock-levels, low-stock, sales reports            | http-routes.md §5, report-contracts.md |
+| BT16 | x      | Stock movement ledger: auto-create movement rows on sale/restock/adjust | V5, V6, FR-2.5                |
+| BT17 | x      | Over-sell guard: DB-level check + controller validation (NFR-3)     | SRS NFR-3, V4                 |
 
 ### Phase 3 — Import & Reports
 
