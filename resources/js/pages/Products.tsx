@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 import { Drawer } from '@/components/Drawer';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
@@ -13,8 +12,8 @@ import { Modal } from '@/components/Modal';
 import { Money } from '@/components/Money';
 import {
     Cell,
+    DataTable,
     HeaderCell,
-    Table,
     TableBody,
     TableHead,
     TableRow,
@@ -322,7 +321,7 @@ export default function Products({
                             type="button"
                             onClick={() => setCategoryId(null)}
                             className={cn(
-                                'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast md:min-h-11',
+                                'min-h-11 shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast',
                                 categoryId === null
                                     ? 'border-amber bg-amber/15 text-amber-deep'
                                     : 'border-line bg-white text-spanish-gray hover:bg-raisin/5 hover:text-raisin',
@@ -343,7 +342,7 @@ export default function Products({
                                         )
                                     }
                                     className={cn(
-                                        'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast md:min-h-11',
+                                        'min-h-11 shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast',
                                         isActive
                                             ? 'border-amber bg-amber/15 text-amber-deep'
                                             : 'border-line bg-white text-spanish-gray hover:bg-raisin/5 hover:text-raisin',
@@ -366,152 +365,113 @@ export default function Products({
                     animate={{ opacity: 1, y: 0 }}
                     transition={gentle}
                 >
-                    <Card className="overflow-hidden">
+                    <div className="overflow-hidden rounded-lg bg-white shadow-card">
                         {filtered.length > 0 ? (
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <HeaderCell>Product</HeaderCell>
-                                            <HeaderCell>Category</HeaderCell>
-                                            <HeaderCell align="right">
-                                                Cost
-                                            </HeaderCell>
-                                            <HeaderCell align="right">
-                                                Selling
-                                            </HeaderCell>
-                                            <HeaderCell align="right">
-                                                Stock
-                                            </HeaderCell>
-                                            <HeaderCell>Status</HeaderCell>
-                                            <HeaderCell align="right">
-                                                Actions
-                                            </HeaderCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {filtered.map((product) => (
-                                            <TableRow key={product.id}>
-                                                <Cell className="max-w-56 min-w-0">
-                                                    <p
-                                                        className={cn(
-                                                            'truncate text-title',
-                                                            product.is_active
-                                                                ? 'text-raisin'
-                                                                : 'text-spanish-gray',
-                                                        )}
-                                                    >
-                                                        {product.name}
-                                                    </p>
-                                                    <p className="truncate text-label text-spanish-gray">
-                                                        {product.sku}
-                                                        {product.barcode
-                                                            ? ` · ${product.barcode}`
-                                                            : ''}
-                                                    </p>
-                                                </Cell>
-                                                <Cell className="text-spanish-gray">
-                                                    {product.category?.name ??
-                                                        '—'}
-                                                </Cell>
-                                                <Cell align="right">
-                                                    <Money
-                                                        pesewas={
-                                                            product.cost_price
-                                                        }
-                                                        className="text-spanish-gray"
-                                                    />
-                                                </Cell>
-                                                <Cell align="right">
-                                                    <Money
-                                                        pesewas={
-                                                            product.selling_price
-                                                        }
-                                                        className="text-raisin"
-                                                    />
-                                                </Cell>
-                                                <Cell align="right">
+                            <DataTable stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <HeaderCell>Product</HeaderCell>
+                                        <HeaderCell className="hidden md:table-cell">Category</HeaderCell>
+                                        <HeaderCell align="right" className="hidden lg:table-cell">Cost</HeaderCell>
+                                        <HeaderCell align="right">Selling</HeaderCell>
+                                        <HeaderCell align="right">Stock</HeaderCell>
+                                        <HeaderCell className="hidden md:table-cell">Status</HeaderCell>
+                                        <HeaderCell align="right">Actions</HeaderCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {filtered.map((product) => (
+                                        <TableRow key={product.id}>
+                                            <Cell className="max-w-56 min-w-0">
+                                                <p
+                                                    className={cn(
+                                                        'truncate text-title',
+                                                        product.is_active
+                                                            ? 'text-raisin'
+                                                            : 'text-spanish-gray',
+                                                    )}
+                                                >
+                                                    {product.name}
+                                                </p>
+                                                <p className="truncate text-label text-spanish-gray">
+                                                    {product.sku}
+                                                    {product.barcode
+                                                        ? ` · ${product.barcode}`
+                                                        : ''}
+                                                </p>
+                                            </Cell>
+                                            <Cell className="hidden text-spanish-gray md:table-cell">
+                                                {product.category?.name ?? '—'}
+                                            </Cell>
+                                            <Cell align="right" className="hidden lg:table-cell">
+                                                <Money
+                                                    pesewas={product.cost_price}
+                                                    className="text-spanish-gray"
+                                                />
+                                            </Cell>
+                                            <Cell align="right">
+                                                <Money
+                                                    pesewas={product.selling_price}
+                                                    className="text-raisin"
+                                                />
+                                            </Cell>
+                                            <Cell align="right">
+                                                <span className="flex items-center justify-end gap-2">
                                                     <span
                                                         className={cn(
-                                                            'flex items-center justify-end gap-2',
+                                                            'font-semibold',
+                                                            product.is_low_stock
+                                                                ? 'text-amber-deep'
+                                                                : 'text-raisin',
                                                         )}
                                                     >
-                                                        <span
-                                                            className={cn(
-                                                                'font-semibold',
-                                                                product.is_low_stock
-                                                                    ? 'text-amber-deep'
-                                                                    : 'text-raisin',
-                                                            )}
-                                                        >
-                                                            {product.stock_on_hand.toLocaleString(
-                                                                'en-GH',
-                                                            )}{' '}
-                                                            {product.unit}
-                                                        </span>
-                                                        {product.is_low_stock && (
-                                                            <Badge variant="amber">
-                                                                Low
-                                                            </Badge>
-                                                        )}
+                                                        {product.stock_on_hand.toLocaleString('en-GH')}{' '}
+                                                        {product.unit}
                                                     </span>
-                                                </Cell>
-                                                <Cell>
-                                                    {product.is_active ? (
-                                                        <Badge variant="green">
-                                                            Active
-                                                        </Badge>
-                                                    ) : (
-                                                        <Badge variant="muted">
-                                                            Inactive
-                                                        </Badge>
+                                                    {product.is_low_stock && (
+                                                        <Badge variant="amber">Low</Badge>
                                                     )}
-                                                </Cell>
-                                                <Cell align="right">
-                                                    <span className="flex items-center justify-end gap-1">
+                                                </span>
+                                            </Cell>
+                                            <Cell className="hidden md:table-cell">
+                                                {product.is_active ? (
+                                                    <Badge variant="green">Active</Badge>
+                                                ) : (
+                                                    <Badge variant="muted">Inactive</Badge>
+                                                )}
+                                            </Cell>
+                                            <Cell align="right">
+                                                <span className="flex items-center justify-end gap-1">
+                                                    <Button
+                                                        variant="plain"
+                                                        size="sm"
+                                                        onClick={() => openEdit(product)}
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                    {product.is_active ? (
+                                                        <Button
+                                                            variant="danger"
+                                                            size="sm"
+                                                            onClick={() => setPendingDeactivate(product)}
+                                                        >
+                                                            Deactivate
+                                                        </Button>
+                                                    ) : (
                                                         <Button
                                                             variant="plain"
                                                             size="sm"
-                                                            onClick={() =>
-                                                                openEdit(
-                                                                    product,
-                                                                )
-                                                            }
+                                                            onClick={() => reactivate(product)}
                                                         >
-                                                            Edit
+                                                            Reactivate
                                                         </Button>
-                                                        {product.is_active ? (
-                                                            <Button
-                                                                variant="danger"
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                    setPendingDeactivate(
-                                                                        product,
-                                                                    )
-                                                                }
-                                                            >
-                                                                Deactivate
-                                                            </Button>
-                                                        ) : (
-                                                            <Button
-                                                                variant="plain"
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                    reactivate(
-                                                                        product,
-                                                                    )
-                                                                }
-                                                            >
-                                                                Reactivate
-                                                            </Button>
-                                                        )}
-                                                    </span>
-                                                </Cell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                                                    )}
+                                                </span>
+                                            </Cell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </DataTable>
                         ) : (
                             <div className="p-4">
                                 <EmptyState
@@ -521,7 +481,7 @@ export default function Products({
                                 />
                             </div>
                         )}
-                    </Card>
+                    </div>
                 </motion.div>
             </div>
 

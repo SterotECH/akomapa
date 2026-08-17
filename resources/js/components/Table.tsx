@@ -8,18 +8,32 @@ import { cn } from '@/lib/utils';
 
 type Align = 'left' | 'right' | 'center';
 
-export function Table({
+export function DataTable({
     className,
+    stickyHeader = false,
     ...props
-}: PropsWithChildren<HTMLAttributes<HTMLTableElement>>) {
+}: PropsWithChildren<HTMLAttributes<HTMLTableElement>> & {
+    stickyHeader?: boolean;
+}) {
     return (
         <div className="w-full overflow-x-auto">
             <table
-                className={cn('w-full border-collapse text-body', className)}
+                className={cn(
+                    'w-full border-collapse text-body',
+                    stickyHeader && '[&>thead]:sticky [&>thead]:top-0 [&>thead]:z-10',
+                    className,
+                )}
                 {...props}
             />
         </div>
     );
+}
+
+export function Table({
+    className,
+    ...props
+}: PropsWithChildren<HTMLAttributes<HTMLTableElement>>) {
+    return <DataTable className={className} {...props} />;
 }
 
 export function TableHead({
@@ -27,7 +41,13 @@ export function TableHead({
     ...props
 }: PropsWithChildren<HTMLAttributes<HTMLTableSectionElement>>) {
     return (
-        <thead className={cn('border-b border-line', className)} {...props} />
+        <thead
+            className={cn(
+                'border-b border-line bg-linen/95 backdrop-blur-sm',
+                className,
+            )}
+            {...props}
+        />
     );
 }
 
@@ -44,7 +64,10 @@ export function TableRow({
 }: PropsWithChildren<HTMLAttributes<HTMLTableRowElement>>) {
     return (
         <tr
-            className={cn('border-b border-line last:border-0', className)}
+            className={cn(
+                'border-b border-line transition-colors duration-fast hover:bg-raisin/[0.02] last:border-0',
+                className,
+            )}
             {...props}
         />
     );

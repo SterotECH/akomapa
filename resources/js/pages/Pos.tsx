@@ -283,7 +283,7 @@ export default function Pos({
                         />
                         <span
                             className={cn(
-                                'flex shrink-0 items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-2 text-label font-semibold transition-colors duration-fast',
+                                'flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-2 text-label font-semibold transition-colors duration-fast',
                                 scanBuffer.length > 0
                                     ? 'text-amber-deep'
                                     : 'text-spanish-gray',
@@ -302,7 +302,7 @@ export default function Pos({
                                 type="button"
                                 onClick={() => setCategoryId(null)}
                                 className={cn(
-                                    'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast md:min-h-11',
+                                    'min-h-11 shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast',
                                     categoryId === null
                                         ? 'border-amber bg-amber/15 text-amber-deep'
                                         : 'border-line bg-white text-spanish-gray hover:bg-raisin/5 hover:text-raisin',
@@ -323,7 +323,7 @@ export default function Pos({
                                             )
                                         }
                                         className={cn(
-                                            'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast md:min-h-11',
+                                            'min-h-11 shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast',
                                             isActive
                                                 ? 'border-amber bg-amber/15 text-amber-deep'
                                                 : 'border-line bg-white text-spanish-gray hover:bg-raisin/5 hover:text-raisin',
@@ -345,7 +345,7 @@ export default function Pos({
 
                     <div className="min-h-0 flex-1 overflow-y-auto pb-24 md:pb-0">
                         {filtered.length > 0 ? (
-                            <div className="grid grid-cols-2 content-start gap-3 pb-2 md:grid-cols-3 xl:grid-cols-4">
+                            <div className="grid grid-cols-1 content-start gap-3 pb-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                                 {filtered.map((product) => {
                                     const out = product.stock_on_hand <= 0;
 
@@ -395,10 +395,10 @@ export default function Pos({
                                                     }
                                                     className="text-figure text-raisin"
                                                 />
-                                                <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-amber/15 text-amber-deep transition-colors duration-fast group-hover:bg-amber group-hover:text-amber-ink">
+                                                <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-amber/15 text-amber-deep transition-colors duration-fast group-hover:bg-amber group-hover:text-amber-ink">
                                                     <Icon
                                                         name="plus"
-                                                        className="size-4"
+                                                        className="size-5"
                                                     />
                                                 </span>
                                             </span>
@@ -472,7 +472,7 @@ export default function Pos({
                     <button
                         type="button"
                         onClick={() => setCartDrawerOpen(true)}
-                        className="flex w-full max-w-lg items-center justify-between gap-3 rounded-lg bg-chrome px-4 py-3 text-chrome-text shadow-modal"
+                        className="flex w-full min-h-14 max-w-lg items-center justify-between gap-3 rounded-lg bg-chrome px-4 py-3 text-chrome-text shadow-modal"
                         aria-label={`Open cart with ${itemCount} items, total ${formatGhs(total)}`}
                     >
                         <span className="flex items-center gap-2.5">

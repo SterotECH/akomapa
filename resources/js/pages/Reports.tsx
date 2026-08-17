@@ -3,7 +3,6 @@ import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { Input } from '@/components/Input';
@@ -11,8 +10,8 @@ import { Money } from '@/components/Money';
 import { StockDot } from '@/components/StockDot';
 import {
     Cell,
+    DataTable,
     HeaderCell,
-    Table,
     TableBody,
     TableHead,
     TableRow,
@@ -192,7 +191,7 @@ function StockLevelsReport({ products }: { products: Product[] }) {
     );
 
     return (
-        <Card className="overflow-hidden">
+        <div className="overflow-hidden rounded-lg bg-white shadow-card">
             <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
                 <h2 className="text-headline text-raisin">Stock levels</h2>
                 <span className="text-label text-spanish-gray">
@@ -200,54 +199,48 @@ function StockLevelsReport({ products }: { products: Product[] }) {
                 </span>
             </div>
 
-            <div className="overflow-x-auto">
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <HeaderCell>SKU</HeaderCell>
-                            <HeaderCell>Product</HeaderCell>
-                            <HeaderCell>Category</HeaderCell>
-                            <HeaderCell>Unit</HeaderCell>
-                            <HeaderCell align="right">On hand</HeaderCell>
-                            <HeaderCell align="right">Reorder at</HeaderCell>
-                            <HeaderCell align="right">Value</HeaderCell>
+            <DataTable stickyHeader>
+                <TableHead>
+                    <TableRow>
+                        <HeaderCell>SKU</HeaderCell>
+                        <HeaderCell>Product</HeaderCell>
+                        <HeaderCell className="hidden md:table-cell">Category</HeaderCell>
+                        <HeaderCell className="hidden md:table-cell">Unit</HeaderCell>
+                        <HeaderCell align="right">On hand</HeaderCell>
+                        <HeaderCell align="right" className="hidden lg:table-cell">Reorder at</HeaderCell>
+                        <HeaderCell align="right">Value</HeaderCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {sorted.map((product) => (
+                        <TableRow key={product.id}>
+                            <Cell className="text-spanish-gray">
+                                {product.sku}
+                            </Cell>
+                            <Cell>
+                                <p className="truncate text-title text-raisin">
+                                    {product.name}
+                                </p>
+                            </Cell>
+                            <Cell className="hidden text-spanish-gray md:table-cell">
+                                {product.category?.name ?? '—'}
+                            </Cell>
+                            <Cell className="hidden text-spanish-gray md:table-cell">
+                                {product.unit}
+                            </Cell>
+                            <Cell align="right">
+                                {product.stock_on_hand.toLocaleString('en-GH')}
+                            </Cell>
+                            <Cell align="right" className="hidden lg:table-cell">
+                                {product.reorder_threshold.toLocaleString('en-GH')}
+                            </Cell>
+                            <Cell align="right">
+                                <Money pesewas={product.stock_value} />
+                            </Cell>
                         </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {sorted.map((product) => (
-                            <TableRow key={product.id}>
-                                <Cell className="text-spanish-gray">
-                                    {product.sku}
-                                </Cell>
-                                <Cell>
-                                    <p className="truncate text-title text-raisin">
-                                        {product.name}
-                                    </p>
-                                </Cell>
-                                <Cell className="text-spanish-gray">
-                                    {product.category?.name ?? '—'}
-                                </Cell>
-                                <Cell className="text-spanish-gray">
-                                    {product.unit}
-                                </Cell>
-                                <Cell align="right">
-                                    {product.stock_on_hand.toLocaleString(
-                                        'en-GH',
-                                    )}
-                                </Cell>
-                                <Cell align="right">
-                                    {product.reorder_threshold.toLocaleString(
-                                        'en-GH',
-                                    )}
-                                </Cell>
-                                <Cell align="right">
-                                    <Money pesewas={product.stock_value} />
-                                </Cell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
+                    ))}
+                </TableBody>
+            </DataTable>
 
             <div className="flex items-center justify-between border-t border-line px-5 py-3">
                 <span className="text-label tracking-wide text-spanish-gray uppercase">
@@ -255,7 +248,7 @@ function StockLevelsReport({ products }: { products: Product[] }) {
                 </span>
                 <Money pesewas={totalValue} className="text-title" />
             </div>
-        </Card>
+        </div>
     );
 }
 
@@ -266,7 +259,7 @@ function LowStockReport({ products }: { products: Product[] }) {
     );
 
     return (
-        <Card className="overflow-hidden">
+        <div className="overflow-hidden rounded-lg bg-white shadow-card">
             <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
                 <h2 className="text-headline text-raisin">Low stock</h2>
                 <Badge variant="amber">
@@ -276,60 +269,48 @@ function LowStockReport({ products }: { products: Product[] }) {
 
             {products.length > 0 ? (
                 <>
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <HeaderCell>SKU</HeaderCell>
-                                    <HeaderCell>Product</HeaderCell>
-                                    <HeaderCell>Unit</HeaderCell>
-                                    <HeaderCell align="right">
-                                        On hand
-                                    </HeaderCell>
-                                    <HeaderCell align="right">
-                                        Reorder at
-                                    </HeaderCell>
-                                    <HeaderCell align="right">Value</HeaderCell>
+                    <DataTable stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <HeaderCell>SKU</HeaderCell>
+                                <HeaderCell>Product</HeaderCell>
+                                <HeaderCell className="hidden md:table-cell">Unit</HeaderCell>
+                                <HeaderCell align="right">On hand</HeaderCell>
+                                <HeaderCell align="right" className="hidden lg:table-cell">Reorder at</HeaderCell>
+                                <HeaderCell align="right">Value</HeaderCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {products.map((product) => (
+                                <TableRow key={product.id}>
+                                    <Cell className="text-spanish-gray">
+                                        {product.sku}
+                                    </Cell>
+                                    <Cell>
+                                        <p className="flex items-center gap-2 truncate text-title text-raisin">
+                                            <StockDot low />
+                                            {product.name}
+                                        </p>
+                                    </Cell>
+                                    <Cell className="hidden text-spanish-gray md:table-cell">
+                                        {product.unit}
+                                    </Cell>
+                                    <Cell
+                                        align="right"
+                                        className="font-semibold text-amber-deep"
+                                    >
+                                        {product.stock_on_hand.toLocaleString('en-GH')}
+                                    </Cell>
+                                    <Cell align="right" className="hidden lg:table-cell">
+                                        {product.reorder_threshold.toLocaleString('en-GH')}
+                                    </Cell>
+                                    <Cell align="right">
+                                        <Money pesewas={product.stock_value} />
+                                    </Cell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {products.map((product) => (
-                                    <TableRow key={product.id}>
-                                        <Cell className="text-spanish-gray">
-                                            {product.sku}
-                                        </Cell>
-                                        <Cell>
-                                            <p className="flex items-center gap-2 truncate text-title text-raisin">
-                                                <StockDot low />
-                                                {product.name}
-                                            </p>
-                                        </Cell>
-                                        <Cell className="text-spanish-gray">
-                                            {product.unit}
-                                        </Cell>
-                                        <Cell
-                                            align="right"
-                                            className="font-semibold text-amber-deep"
-                                        >
-                                            {product.stock_on_hand.toLocaleString(
-                                                'en-GH',
-                                            )}
-                                        </Cell>
-                                        <Cell align="right">
-                                            {product.reorder_threshold.toLocaleString(
-                                                'en-GH',
-                                            )}
-                                        </Cell>
-                                        <Cell align="right">
-                                            <Money
-                                                pesewas={product.stock_value}
-                                            />
-                                        </Cell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
+                            ))}
+                        </TableBody>
+                    </DataTable>
 
                     <div className="flex items-center justify-between border-t border-line px-5 py-3">
                         <span className="text-label tracking-wide text-spanish-gray uppercase">
@@ -347,7 +328,7 @@ function LowStockReport({ products }: { products: Product[] }) {
                     />
                 </div>
             )}
-        </Card>
+        </div>
     );
 }
 
@@ -367,7 +348,7 @@ function SalesReport({
     onTo: (value: string) => void;
 }) {
     return (
-        <Card className="overflow-hidden">
+        <div className="overflow-hidden rounded-lg bg-white shadow-card">
             <div className="flex flex-col gap-3 border-b border-line px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="text-headline text-raisin">Sales</h2>
                 <div className="no-print flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -400,38 +381,34 @@ function SalesReport({
 
             {sales.length > 0 ? (
                 <>
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <HeaderCell>Sale</HeaderCell>
-                                    <HeaderCell>Date</HeaderCell>
-                                    <HeaderCell align="right">Items</HeaderCell>
-                                    <HeaderCell align="right">Total</HeaderCell>
+                    <DataTable stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <HeaderCell>Sale</HeaderCell>
+                                <HeaderCell>Date</HeaderCell>
+                                <HeaderCell align="right">Items</HeaderCell>
+                                <HeaderCell align="right">Total</HeaderCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {sales.map((sale) => (
+                                <TableRow key={sale.id}>
+                                    <Cell className="text-raisin">
+                                        {sale.sale_number}
+                                    </Cell>
+                                    <Cell className="text-spanish-gray">
+                                        {formatReportDate(sale.sold_at)}
+                                    </Cell>
+                                    <Cell align="right">
+                                        {sale.items_count.toLocaleString('en-GH')}
+                                    </Cell>
+                                    <Cell align="right">
+                                        <Money pesewas={sale.total} />
+                                    </Cell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {sales.map((sale) => (
-                                    <TableRow key={sale.id}>
-                                        <Cell className="text-raisin">
-                                            {sale.sale_number}
-                                        </Cell>
-                                        <Cell className="text-spanish-gray">
-                                            {formatReportDate(sale.sold_at)}
-                                        </Cell>
-                                        <Cell align="right">
-                                            {sale.items_count.toLocaleString(
-                                                'en-GH',
-                                            )}
-                                        </Cell>
-                                        <Cell align="right">
-                                            <Money pesewas={sale.total} />
-                                        </Cell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
+                            ))}
+                        </TableBody>
+                    </DataTable>
 
                     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-3">
                         <p className="text-label text-spanish-gray">
@@ -450,6 +427,6 @@ function SalesReport({
                     />
                 </div>
             )}
-        </Card>
+        </div>
     );
 }

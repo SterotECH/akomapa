@@ -10,8 +10,8 @@ import { Money } from '@/components/Money';
 import { StockDot } from '@/components/StockDot';
 import {
     Cell,
+    DataTable,
     HeaderCell,
-    Table,
     TableBody,
     TableHead,
     TableRow,
@@ -328,7 +328,7 @@ export default function Dashboard({
                         animate={{ opacity: 1, y: 0 }}
                         transition={gentle}
                     >
-                        <Card className="overflow-hidden">
+                        <div className="overflow-hidden rounded-lg bg-white shadow-card sm:shadow-card">
                             <div className="flex items-center justify-between border-b border-line px-5 py-4">
                                 <h2 className="text-headline text-raisin">
                                     Recent movements
@@ -344,71 +344,56 @@ export default function Dashboard({
                                     />
                                 </Link>
                             </div>
-                            <Table>
+                            <DataTable stickyHeader>
                                 <TableHead>
                                     <TableRow>
                                         <HeaderCell>Product</HeaderCell>
-                                            <HeaderCell>Type</HeaderCell>
-                                            <HeaderCell align="right">
-                                                Qty
-                                            </HeaderCell>
-                                            <HeaderCell>When</HeaderCell>
-                                            <HeaderCell>Note</HeaderCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {recentMovements.map((movement) => (
-                                            <TableRow key={movement.id}>
-                                                <Cell className="max-w-48 min-w-0">
-                                                    <p className="truncate text-title text-raisin">
-                                                        {movement.product?.name}
-                                                    </p>
-                                                    <p className="text-label text-spanish-gray">
-                                                        {movement.product?.sku}
-                                                    </p>
-                                                </Cell>
-                                                <Cell>
-                                                    <Badge
-                                                        variant={
-                                                            movementBadge[
-                                                                movement.type
-                                                            ].variant
-                                                        }
-                                                    >
-                                                        {
-                                                            movementBadge[
-                                                                movement.type
-                                                            ].label
-                                                        }
-                                                    </Badge>
-                                                </Cell>
-                                                <Cell
-                                                    align="right"
-                                                    className={cn(
-                                                        'font-semibold',
-                                                        quantityClass[
-                                                            movement.type
-                                                        ],
-                                                    )}
+                                        <HeaderCell>Type</HeaderCell>
+                                        <HeaderCell align="right">Qty</HeaderCell>
+                                        <HeaderCell className="hidden lg:table-cell">When</HeaderCell>
+                                        <HeaderCell className="hidden lg:table-cell">Note</HeaderCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {recentMovements.map((movement) => (
+                                        <TableRow key={movement.id}>
+                                            <Cell className="max-w-48 min-w-0">
+                                                <p className="truncate text-title text-raisin">
+                                                    {movement.product?.name}
+                                                </p>
+                                                <p className="text-label text-spanish-gray">
+                                                    {movement.product?.sku}
+                                                </p>
+                                            </Cell>
+                                            <Cell>
+                                                <Badge
+                                                    variant={
+                                                        movementBadge[movement.type].variant
+                                                    }
                                                 >
-                                                    {formatSignedQuantity(
-                                                        movement.quantity,
-                                                    )}
-                                                </Cell>
-                                                <Cell className="text-spanish-gray">
-                                                    {formatWhen(
-                                                        movement.occurred_at,
-                                                    )}
-                                                </Cell>
-                                                <Cell className="max-w-40 truncate text-spanish-gray">
-                                                    {movement.note ?? '—'}
-                                                </Cell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </Card>
+                                                    {movementBadge[movement.type].label}
+                                                </Badge>
+                                            </Cell>
+                                            <Cell
+                                                align="right"
+                                                className={cn(
+                                                    'font-semibold',
+                                                    quantityClass[movement.type],
+                                                )}
+                                            >
+                                                {formatSignedQuantity(movement.quantity)}
+                                            </Cell>
+                                            <Cell className="hidden text-spanish-gray lg:table-cell">
+                                                {formatWhen(movement.occurred_at)}
+                                            </Cell>
+                                            <Cell className="hidden max-w-40 truncate text-spanish-gray lg:table-cell">
+                                                {movement.note ?? '—'}
+                                            </Cell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </DataTable>
+                        </div>
                     </motion.div>
                 </>
             ) : (
