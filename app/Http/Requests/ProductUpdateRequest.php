@@ -14,12 +14,12 @@ class ProductUpdateRequest extends FormRequest
 
     public function rules(): array
     {
-        $productId = $this->route('product')?->id;
+        $productId = $this->route('product');
 
         return [
-            'sku' => ['required', 'string', Rule::unique('products,sku')->ignore($productId)],
+            'sku' => ['required', 'string', Rule::unique('products', 'sku')->ignore($productId, 'id')],
             'name' => ['required', 'string', 'max:255'],
-            'barcode' => ['nullable', 'string', Rule::unique('products,barcode')->ignore($productId)],
+            'barcode' => ['nullable', 'string', Rule::unique('products', 'barcode')->ignore($productId, 'id')],
             'category_id' => ['nullable', 'exists:categories,id'],
             'unit' => ['required', 'string', 'max:50'],
             'cost_price' => ['required', 'integer', 'min:0'],

@@ -43,8 +43,6 @@ class StockController extends Controller
         $occurredAt = $request->validated('occurred_at') ?? now();
 
         foreach ($items as $item) {
-            Product::where('id', $item['product_id'])->increment('stock_on_hand', $item['quantity']);
-
             StockMovement::create([
                 'product_id' => $item['product_id'],
                 'type' => StockMovement::TYPE_RESTOCK,
