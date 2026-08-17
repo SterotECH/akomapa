@@ -1,13 +1,12 @@
 # Design
 
 <!-- impeccable:design-schema 1 -->
-<!-- impeccable:seed-marker 1 -->
 
 ## Overview
 
 A point-of-sale and inventory system for a single-owner retail shop (Akomapa Neat Enterprise, Ghana). It is a real working tool — dense, fast, warm — for work at the counter and on a tablet, not a marketing page. The visual authority is the confirmed Behance POS reference (Prafful Kumar): warm Linen paper background, Cultured White cards, Raisin Black navigation and text, Amber as the single primary accent, Green reserved for positive/money/in-stock states, Spanish Gray for everything muted.
 
-This document is in **seed mode**: the design system tokens and color palette are established (confirmed by the client), but no components or screens exist yet. Re-run `document` after the first build pass to carbonize real component styles.
+This document reflects the **implemented UI** (T1–T12 complete). Component styles below match the live codebase.
 
 ## Problem Statement
 
@@ -122,6 +121,166 @@ Documentation of the canonical implementation lives in **UI_BUILD.md** (screens,
 - **POS layout is fixed**: a full-height split — left search + product grid, right cart — that never scrolls behind a page scroll. This is the flagship; it gets the most polish.
 - **Ink follows the system, not the preview**: components named after roles (Button `primary`/`plain`/`danger`, Badge `amber`/`green`/`muted`) so the palette can shift in one place without touching screens.
 - **Motion order is decided**: add-to-cart `wobbly`, drawers/modals `gentle`, everything else `fast`. Reduced motion collapses to `fast`. No new curves.
+
+## Components
+
+All components live in `resources/js/components/`. Tokens come from `@theme` in `app.css`; no raw hex in JSX.
+
+### Button
+
+| Prop | Values | Default |
+| --- | --- | --- |
+| `variant` | `primary` · `plain` · `danger` | `primary` |
+| `size` | `sm` · `md` | `md` |
+
+- **primary**: `bg-amber text-amber-ink hover:bg-amber-deep` — solid gold, dark text
+- **plain**: `bg-transparent text-raisin hover:bg-raisin/5` — ghost, faint hover tint
+- **danger**: `bg-transparent text-danger hover:bg-danger/5` — ghost danger, faint red hover
+- **sm**: `px-3 py-1.5 text-label min-h-10` (40px on md+)
+- **md**: `px-4 py-2.5 text-title min-h-11` (44px)
+- Base: `inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-colors duration-fast active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40`
+- Forces `type="button"`. Press-down micro-animation via `active:scale-[0.98]`.
+
+### Badge
+
+| Prop | Values | Default |
+| --- | --- | --- |
+| `variant` | `amber` · `green` · `muted` | `muted` |
+
+- **amber**: `bg-amber/15 text-amber-deep` — 15% gold background
+- **green**: `bg-green/10 text-green-deep` — 10% green background
+- **muted**: `bg-line/60 text-spanish-gray` — 60% line color background
+- Base: `inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-label font-semibold`
+- Always pill-shaped (`rounded-full`). Single size.
+
+### Input / SearchField
+
+- **Input**: `w-full rounded-sm border border-line bg-white px-3 py-2.5 text-body text-raisin transition-shadow duration-fast outline-none placeholder:text-spanish-gray focus:ring-2 focus:ring-amber`
+- **SearchField**: Wraps Input in `relative` div with `Icon name="search"` (size-5, left-3, vertically centered). Input gets `pl-10`. Forces `type="search"`.
+- Focus ring is amber. Border-radius is `rounded-sm` (6px).
+
+### Card
+
+| Prop | Values | Default |
+| --- | --- | --- |
+| `interactive` | `boolean` | `false` |
+
+- Base: `rounded-lg bg-white shadow-card`
+- Interactive adds: `transition-shadow duration-fast hover:shadow-raised`
+- Shadow elevation: base = `shadow-card`, hover = `shadow-raised`
+
+### Modal
+
+| Prop | Type |
+| --- | --- |
+| `open` | `boolean` (required) |
+| `onClose` | `() => void` (required) |
+| `title` | `string` (required) |
+
+- Fixed overlay (`z-50`, `bg-chrome/60`), centered flex container
+- Dialog panel: `w-full max-w-lg rounded-lg bg-white shadow-modal`
+- Header: `flex items-center justify-between border-b border-line px-6 py-4`
+- Title: `text-headline text-raisin`. Close button: `size-11 rounded-md`
+- Body: `px-6 py-4`
+- Animation: `gentle` spring. Panel enters `opacity 0, scale 0.95, y: 8`
+- Escape key and backdrop click close. `role="dialog"`, `aria-modal`.
+
+### Drawer
+
+| Prop | Type |
+| --- | --- |
+| `open` | `boolean` (required) |
+| `onClose` | `() => void` (required) |
+| `title` | `string` (required) |
+| `footer` | `ReactNode` (optional) |
+
+- Fixed overlay (`z-50`, `bg-chrome/60`). Panel: `absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-modal`
+- Slides from right (`x: 100%` → `x: 0`) using `gentle` spring
+- Header same as Modal. Content: `flex-1 overflow-y-auto px-6 py-4`
+- Footer (optional): `border-t border-line px-6 py-4`
+
+### DataTable / Table
+
+| Export | Purpose |
+| --- | --- |
+| `DataTable` | Table with optional `stickyHeader` prop |
+| `Table` | Alias for `DataTable` |
+| `TableHead` | `<thead>` with `border-b border-line bg-linen/95 backdrop-blur-sm` |
+| `TableBody` | `<tbody>` |
+| `TableRow` | `<tr>` with `border-b border-line hover:bg-raisin/[0.02] last:border-0` |
+| `HeaderCell` | `<th>` — `px-3 py-2.5 text-label font-semibold tracking-wide text-spanish-gray uppercase` |
+| `Cell` | `<td>` — `px-3 py-3 text-raisin whitespace-nowrap`. Right alignment adds `tabular-nums`. |
+
+- Sticky header: `[&>thead]:sticky [&>thead]:top-0 [&>thead]:z-10`
+- Wrapper: `w-full overflow-x-auto`
+
+### EmptyState
+
+| Prop | Type |
+| --- | --- |
+| `icon` | `IconName` (required) |
+| `title` | `string` (required) |
+| `description` | `string` (optional) |
+
+- `flex flex-col items-center gap-2 rounded-lg border border-dashed border-line bg-white/50 px-6 py-12 text-center`
+- Icon: `size-8 text-spanish-gray`. Title: `text-title text-raisin`. Description: `text-body text-spanish-gray`
+
+### Money
+
+| Prop | Type |
+| --- | --- |
+| `pesewas` | `number` (required) — amount in pesewas |
+| `className` | `string` (optional) |
+
+- Renders `GH₵ X,XXX.XX` via `formatGhs()`. Always `text-figure tabular-nums`.
+- Divides by 100, formats with `en-GH` locale (2 decimal places).
+
+### StockDot
+
+| Prop | Type |
+| --- | --- |
+| `low` | `boolean` (required) |
+
+- `low=true`: Pulsing amber dot — two stacked `span` elements, `size-2.5 rounded-full bg-amber`, background span has `motion-safe:animate-ping`
+- `low=false`: Static green dot — `size-2.5 rounded-full bg-green`
+- Ping animation respects `prefers-reduced-motion` via `motion-safe:` prefix.
+
+### Toast (useToasts + ToastStack)
+
+- `useToasts()` returns `{ toasts, push, dismiss }`
+- Tones: `success` (green icon), `warning` (amber icon), `danger` (red icon)
+- Toast card: `w-full max-w-sm rounded-md border border-line bg-white py-2 pr-3 pl-2 shadow-modal`
+- Position: `fixed inset-x-0 top-20 z-50`, centered
+- Auto-dismiss: 2000ms for success, 3200ms for others. Max 3 visible.
+- Animation: enters from `y: -14, scale: 0.95`, exits to `scale: 0.95`. `gentle` spring.
+
+### Icon
+
+| Prop | Type |
+| --- | --- |
+| `name` | `IconName` (required) |
+
+- 22 icons: `dashboard`, `pos`, `products`, `stock`, `reports`, `logout`, `search`, `cart`, `plus`, `minus`, `close`, `check`, `print`, `download`, `warning`, `clock`, `barcode`, `filter`, `arrow-right`, `sun`, `moon`, `menu`
+- SVG: `viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, `strokeWidth={1.75}`
+- Default size: `size-6` (24px). Pure inline SVG, no external library.
+
+### TrendChart
+
+| Prop | Type |
+| --- | --- |
+| `data` | `SalesPoint[]` (required) — `{ label: string, value: number }` |
+
+- Recharts `AreaChart` with green gradient fill (22% → 0% opacity)
+- Stroke: `green`, `strokeWidth={2}`, no data dots
+- Custom tooltip: `rounded-md border px-3 py-2 shadow-card`, value formatted via `formatGhs()`
+- Full dark mode support via CSS custom properties read from `document.documentElement`
+
+### AppLayout
+
+- Dark raisin sidebar (`w-32`, `bg-chrome`, `lg:flex`) + topbar (`h-16`, `bg-linen/95`)
+- Bottom nav on `< lg`: `fixed inset-x-0 bottom-0`, `min-h-16` touch targets
+- Content wrapper: `pt-16 pb-16 lg:pb-0`, sidebar margin `lg:ml-32`
+- Sidebar toggle persisted in `localStorage` (`akomapa-sidebar`)
 
 ## Design Rules & Constraints
 

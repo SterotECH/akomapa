@@ -70,8 +70,8 @@ V12: ⊥ real data in screenshots; synthetic labeled
 | T8  | x      | Stock screen: restock, movements, low-stock, adjustment                                            | V3,V5,V6,V8 |
 | T9  | x      | Reports screen: 3 tabs, range, print stylesheet                                                    | V8,V12      |
 | T10 | x      | mock-data module + route wiring                                                                    | V12         |
-| T11 | .      | responsive tablet pass (breakpoints, touch targets)                                                | V10,V11     |
-| T12 | .      | screenshot pass: detect.mjs per screen + DESIGN.md carbonize                                       | V9,V12      |
+| T11 | x      | responsive tablet pass (breakpoints, touch targets)                                                | V10,V11     |
+| T12 | x      | screenshot pass: detect.mjs per screen + DESIGN.md carbonize                                       | V9,V12      |
 | T13 | .      | hand-off: pending decisions, synthetic-data label                                                  | V12         |
 
 Order rules: T1→T3 foundation. T6 flagship after primitives, before others. T4/T5 early for scaffold proof. T7→T9 after T6. T10 any time after T3 (mock data). T11 after screens exist. T12 last, blocks hand-off. T13 requires T12.
