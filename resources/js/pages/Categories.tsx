@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
@@ -22,6 +22,7 @@ import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import {
     store as categoriesStore,
+    show as categoriesShow,
     update as categoriesUpdate,
     destroy as categoriesDestroy,
 } from '@/routes/categories';
@@ -138,7 +139,7 @@ export default function Categories({ categories }: CategoriesPageProps) {
                     </div>
 
                     {filtered.length > 0 ? (
-                        <DataTable stickyHeader columns={[60, 20, 20]}>
+                        <DataTable stickyHeader columns={[50, 15, 15, 20]}>
                             <TableHead>
                                 <TableRow>
                                     <HeaderCell>Name</HeaderCell>
@@ -154,9 +155,12 @@ export default function Categories({ categories }: CategoriesPageProps) {
                                 {filtered.map((category) => (
                                     <TableRow key={category.id}>
                                         <Cell>
-                                            <span className="text-title text-raisin">
+                                            <Link
+                                                href={categoriesShow.url(category.id)}
+                                                className="text-title text-raisin transition-colors duration-fast hover:text-amber-deep"
+                                            >
                                                 {category.name}
-                                            </span>
+                                            </Link>
                                         </Cell>
                                         <Cell align="right">
                                             <Badge variant="muted">
@@ -167,14 +171,22 @@ export default function Categories({ categories }: CategoriesPageProps) {
                                         </Cell>
                                         <Cell align="right">
                                             <span className="flex items-center justify-end gap-1">
+                                                <Link
+                                                    href={categoriesShow.url(category.id)}
+                                                    className="flex min-h-8 min-w-8 items-center justify-center rounded-md text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-raisin"
+                                                    title="View category"
+                                                >
+                                                    <Icon name="eye" className="size-4" />
+                                                </Link>
                                                 <Button
                                                     variant="plain"
                                                     size="sm"
                                                     onClick={() =>
                                                         openEdit(category)
                                                     }
+                                                    title="Edit category"
                                                 >
-                                                    Edit
+                                                    <Icon name="edit" className="size-4" />
                                                 </Button>
                                                 <Button
                                                     variant="danger"
@@ -182,8 +194,9 @@ export default function Categories({ categories }: CategoriesPageProps) {
                                                     onClick={() =>
                                                         confirmDelete(category)
                                                     }
+                                                    title="Delete category"
                                                 >
-                                                    Delete
+                                                    <Icon name="trash" className="size-4" />
                                                 </Button>
                                             </span>
                                         </Cell>

@@ -408,32 +408,36 @@ export default function Products({
                                                 <span className="flex items-center justify-end gap-1">
                                                     <Link
                                                         href={productsShow.url(product.id)}
-                                                        className="inline-flex min-h-8 items-center gap-1 rounded-md px-2.5 text-label font-semibold text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-raisin"
+                                                        className="flex min-h-8 min-w-8 items-center justify-center rounded-md text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-raisin"
+                                                        title="View product"
                                                     >
-                                                        View
+                                                        <Icon name="eye" className="size-4" />
                                                     </Link>
                                                     <Button
                                                         variant="plain"
                                                         size="sm"
                                                         onClick={() => openEdit(product)}
+                                                        title="Edit product"
                                                     >
-                                                        Edit
+                                                        <Icon name="edit" className="size-4" />
                                                     </Button>
                                                     {product.is_active ? (
                                                         <Button
                                                             variant="danger"
                                                             size="sm"
                                                             onClick={() => setPendingDeactivate(product)}
+                                                            title="Deactivate product"
                                                         >
-                                                            Deactivate
+                                                            <Icon name="warning" className="size-4" />
                                                         </Button>
                                                     ) : (
                                                         <Button
                                                             variant="plain"
                                                             size="sm"
                                                             onClick={() => reactivate(product)}
+                                                            title="Reactivate product"
                                                         >
-                                                            Reactivate
+                                                            <Icon name="check" className="size-4" />
                                                         </Button>
                                                     )}
                                                 </span>

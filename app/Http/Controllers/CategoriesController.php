@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,21 @@ class CategoriesController extends Controller
 
         return Inertia::render('Categories', [
             'categories' => CategoryResource::collection($categories)->resolve(),
+        ]);
+    }
+
+    public function show(Category $category): Response
+    {
+        $category->loadCount('products');
+
+        $products = $category->products()
+            ->with('category')
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('CategoryShow', [
+            'category' => (new CategoryResource($category))->resolve(),
+            'products' => ProductResource::collection($products)->resolve(),
         ]);
     }
 

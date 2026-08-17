@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function (): void {
     // Categories
     Route::get('/categories', [CategoriesController::class, 'index'])
         ->name('categories.index');
+    Route::get('/categories/{category}', [CategoriesController::class, 'show'])
+        ->name('categories.show');
     Route::post('/categories', [CategoriesController::class, 'store'])
         ->name('categories.store');
     Route::patch('/categories/{category}', [CategoriesController::class, 'update'])
