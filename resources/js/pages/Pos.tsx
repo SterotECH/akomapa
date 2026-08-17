@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Badge } from '@/components/Badge';
@@ -8,6 +8,7 @@ import { Drawer } from '@/components/Drawer';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { SearchField } from '@/components/Input';
+import { Modal } from '@/components/Modal';
 import { Money } from '@/components/Money';
 import { StockDot } from '@/components/StockDot';
 import { ToastStack, useToasts } from '@/components/Toast';
@@ -15,7 +16,8 @@ import type { ToastTone } from '@/components/Toast';
 import { formatGhs } from '@/lib/format';
 import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
-import type { CartLine, Category, Product } from '@/types';
+import { store as salesStore } from '@/routes/sales';
+import type { CartLine, Category, Customer, Product } from '@/types';
 
 const SEARCH_ID = 'pos-search';
 const MAX_SCAN_LENGTH = 40;
@@ -23,12 +25,14 @@ const MAX_SCAN_LENGTH = 40;
 type PosPageProps = {
     products: Product[];
     categories: Category[];
+    customers: Customer[];
     today_sales: { count: number; total: number };
 };
 
 export default function Pos({
     products,
     categories,
+    customers,
     today_sales,
 }: PosPageProps) {
     const { wobbly } = useSprings();
@@ -38,6 +42,10 @@ export default function Pos({
     const [cart, setCart] = useState<CartLine[]>([]);
     const [scanBuffer, setScanBuffer] = useState('');
     const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [customerSearch, setCustomerSearch] = useState('');
+    const [amountReceived, setAmountReceived] = useState('');
+    const [checkoutOpen, setCheckoutOpen] = useState(false);
 
     const scanBufferRef = useRef('');
     const addToCartRef = useRef<(product: Product) => void>(() => {});
@@ -73,6 +81,31 @@ export default function Pos({
     const itemCount = useMemo(
         () => cart.reduce((sum, line) => sum + line.quantity, 0),
         [cart],
+    );
+
+    const filteredCustomers = useMemo(() => {
+        const term = customerSearch.trim().toLowerCase();
+
+        if (term.length === 0) {
+            return customers;
+        }
+
+        return customers.filter(
+            (customer) =>
+                customer.name.toLowerCase().includes(term) ||
+                customer.phone?.toLowerCase().includes(term),
+        );
+    }, [customers, customerSearch]);
+
+    const amountReceivedPesewas = useMemo(() => {
+        const value = Number.parseFloat(amountReceived);
+
+        return Number.isFinite(value) ? Math.round(value * 100) : 0;
+    }, [amountReceived]);
+
+    const change = useMemo(
+        () => (amountReceivedPesewas > 0 ? amountReceivedPesewas - total : 0),
+        [amountReceivedPesewas, total],
     );
 
     function addToCart(product: Product) {
@@ -190,10 +223,38 @@ export default function Pos({
             return;
         }
 
-        const message = `Sale complete · ${itemCount} item${itemCount === 1 ? '' : 's'} · ${formatGhs(total)}`;
-        setCart([]);
-        setCartDrawerOpen(false);
-        push(message, 'success');
+        router.post(
+            salesStore.url(),
+            {
+                customer_id: selectedCustomer?.id || null,
+                items: cart.map((line) => ({
+                    product_id: line.product_id,
+                    quantity: line.quantity,
+                    unit_price: line.unit_price,
+                })),
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    const changeText =
+                        change > 0
+                            ? ` · Change: ${formatGhs(change)}`
+                            : '';
+                    const customerText = selectedCustomer
+                        ? ` · ${selectedCustomer.name}`
+                        : '';
+                    const message = `Sale complete${customerText} · ${itemCount} item${itemCount === 1 ? '' : 's'} · ${formatGhs(total)}${changeText}`;
+
+                    setCart([]);
+                    setSelectedCustomer(null);
+                    setCustomerSearch('');
+                    setAmountReceived('');
+                    setCartDrawerOpen(false);
+                    setCheckoutOpen(false);
+                    push(message, 'success');
+                },
+            },
+        );
     }
 
     useEffect(() => {
@@ -447,10 +508,10 @@ export default function Pos({
                             <Button
                                 className="w-full"
                                 disabled={cart.length === 0}
-                                onClick={completeSale}
+                                onClick={() => setCheckoutOpen(true)}
                             >
                                 <Icon name="check" className="size-4" />
-                                Complete Sale
+                                Checkout
                             </Button>
                         </div>
                     </Card>
@@ -505,10 +566,13 @@ export default function Pos({
                         <Button
                             className="w-full"
                             disabled={cart.length === 0}
-                            onClick={completeSale}
+                            onClick={() => {
+                                setCartDrawerOpen(false);
+                                setCheckoutOpen(true);
+                            }}
                         >
                             <Icon name="check" className="size-4" />
-                            Complete Sale
+                            Checkout
                         </Button>
                     </>
                 }
@@ -521,6 +585,24 @@ export default function Pos({
                     onUnitPrice={setUnitPrice}
                 />
             </Drawer>
+
+            <CheckoutModal
+                open={checkoutOpen}
+                onClose={() => setCheckoutOpen(false)}
+                cart={cart}
+                total={total}
+                itemCount={itemCount}
+                customers={customers}
+                filteredCustomers={filteredCustomers}
+                selectedCustomer={selectedCustomer}
+                onSelectCustomer={setSelectedCustomer}
+                customerSearch={customerSearch}
+                onCustomerSearchChange={setCustomerSearch}
+                amountReceived={amountReceived}
+                onAmountReceivedChange={setAmountReceived}
+                change={change}
+                onCompleteSale={completeSale}
+            />
 
             <ToastStack toasts={toasts} onDismiss={dismiss} />
         </>
@@ -665,5 +747,172 @@ function PriceInput({
             aria-label="Unit price in GHS"
             className="mt-0.5 w-20 rounded-sm border border-transparent bg-transparent px-1 py-0.5 text-figure text-spanish-gray tabular-nums transition-all duration-fast outline-none focus:border-line focus:bg-white focus:text-raisin focus:ring-2 focus:ring-amber"
         />
+    );
+}
+
+function CheckoutModal({
+    open,
+    onClose,
+    cart,
+    total,
+    itemCount,
+    customers,
+    filteredCustomers,
+    selectedCustomer,
+    onSelectCustomer,
+    customerSearch,
+    onCustomerSearchChange,
+    amountReceived,
+    onAmountReceivedChange,
+    change,
+    onCompleteSale,
+}: {
+    open: boolean;
+    onClose: () => void;
+    cart: CartLine[];
+    total: number;
+    itemCount: number;
+    customers: Customer[];
+    filteredCustomers: Customer[];
+    selectedCustomer: Customer | null;
+    onSelectCustomer: (customer: Customer | null) => void;
+    customerSearch: string;
+    onCustomerSearchChange: (value: string) => void;
+    amountReceived: string;
+    onAmountReceivedChange: (value: string) => void;
+    change: number;
+    onCompleteSale: () => void;
+}) {
+    const [showCustomerList, setShowCustomerList] = useState(false);
+
+    if (!open) {
+        return null;
+    }
+
+    return (
+        <Modal open={open} onClose={onClose} title="Checkout">
+            <div className="flex flex-col gap-4">
+                <div className="rounded-md border border-line bg-white p-3">
+                    <div className="flex items-center justify-between">
+                        <span className="text-label tracking-wide text-spanish-gray uppercase">
+                            {itemCount} item{itemCount === 1 ? '' : 's'}
+                        </span>
+                        <Money
+                            pesewas={total}
+                            className="text-headline text-raisin"
+                        />
+                    </div>
+                </div>
+
+                <div className="relative">
+                    <label className="mb-1 block text-label text-spanish-gray">
+                        Customer (optional)
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="Search by name or phone…"
+                        value={customerSearch}
+                        onChange={(event) => {
+                            onCustomerSearchChange(event.target.value);
+                            setShowCustomerList(true);
+                        }}
+                        onFocus={() => setShowCustomerList(true)}
+                        className="w-full rounded-sm border border-line bg-white px-3 py-2.5 text-body text-raisin transition-shadow duration-fast outline-none placeholder:text-spanish-gray focus:ring-2 focus:ring-amber"
+                    />
+                    {selectedCustomer && (
+                        <div className="mt-1 flex items-center gap-2">
+                            <Badge variant="amber">{selectedCustomer.name}</Badge>
+                            {selectedCustomer.phone && (
+                                <span className="text-label text-spanish-gray">
+                                    {selectedCustomer.phone}
+                                </span>
+                            )}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    onSelectCustomer(null);
+                                    onCustomerSearchChange('');
+                                    setShowCustomerList(false);
+                                }}
+                                className="ml-auto text-spanish-gray hover:text-danger"
+                            >
+                                <Icon name="close" className="size-4" />
+                            </button>
+                        </div>
+                    )}
+                    {showCustomerList && !selectedCustomer && filteredCustomers.length > 0 && (
+                        <div className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-line bg-white shadow-raised">
+                            {filteredCustomers.slice(0, 10).map((customer) => (
+                                <button
+                                    key={customer.id}
+                                    type="button"
+                                    onClick={() => {
+                                        onSelectCustomer(customer);
+                                        onCustomerSearchChange('');
+                                        setShowCustomerList(false);
+                                    }}
+                                    className="flex w-full items-center justify-between px-3 py-2 text-left text-body transition-colors duration-fast hover:bg-raisin/5"
+                                >
+                                    <span className="text-raisin">{customer.name}</span>
+                                    {customer.phone && (
+                                        <span className="text-label text-spanish-gray">
+                                            {customer.phone}
+                                        </span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div>
+                    <label className="mb-1 block text-label text-spanish-gray">
+                        Amount Received (GHS)
+                    </label>
+                    <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0.00"
+                        value={amountReceived}
+                        onChange={(event) => onAmountReceivedChange(event.target.value)}
+                        className="w-full rounded-sm border border-line bg-white px-3 py-2.5 text-body text-raisin transition-shadow duration-fast outline-none placeholder:text-spanish-gray focus:ring-2 focus:ring-amber"
+                    />
+                </div>
+
+                {change > 0 && (
+                    <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
+                        <div className="flex items-center justify-between">
+                            <span className="text-label text-emerald-700">
+                                Change
+                            </span>
+                            <Money
+                                pesewas={change}
+                                className="text-headline text-emerald-700"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {amountReceived && Number.parseFloat(amountReceived) < total / 100 && (
+                    <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
+                        <span className="text-label text-amber-700">
+                            Insufficient amount
+                        </span>
+                    </div>
+                )}
+
+                <Button
+                    className="w-full"
+                    disabled={
+                        cart.length === 0 ||
+                        (amountReceived && Number.parseFloat(amountReceived) < total / 100)
+                    }
+                    onClick={onCompleteSale}
+                >
+                    <Icon name="check" className="size-4" />
+                    Complete Sale
+                </Button>
+            </div>
+        </Modal>
     );
 }

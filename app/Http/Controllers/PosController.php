@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\CustomerResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Category;
+use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Http\Request;
@@ -22,6 +24,8 @@ class PosController extends Controller
 
         $categories = Category::orderBy('name')->get();
 
+        $customers = Customer::orderBy('name')->get();
+
         // Today's sales summary
         $todaySales = Sale::active()
             ->whereDate('sold_at', today())
@@ -31,6 +35,7 @@ class PosController extends Controller
         return Inertia::render('Pos', [
             'products' => ProductResource::collection($products)->resolve(),
             'categories' => CategoryResource::collection($categories)->resolve(),
+            'customers' => CustomerResource::collection($customers)->resolve(),
             'today_sales' => [
                 'count' => $todaySales->count,
                 'total' => $todaySales->total,

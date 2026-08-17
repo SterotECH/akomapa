@@ -3,6 +3,12 @@ export type Category = {
     name: string;
 };
 
+export type Customer = {
+    id: string;
+    name: string;
+    phone: string | null;
+};
+
 export type Product = {
     id: string;
     sku: string;
