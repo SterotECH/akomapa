@@ -6,9 +6,11 @@ use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\StockMovementResource;
 use App\Imports\ProductImport;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\StockMovement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -32,6 +34,21 @@ class ProductsController extends Controller
             'products' => ProductResource::collection($products)->resolve(),
             'categories' => CategoryResource::collection(Category::orderBy('name')->get())->resolve(),
             'filters' => $request->only(['search', 'category_id']),
+        ]);
+    }
+
+    public function show(Product $product): Response
+    {
+        $product->load('category');
+
+        $movements = StockMovement::where('product_id', $product->id)
+            ->orderBy('occurred_at', 'desc')
+            ->limit(50)
+            ->get();
+
+        return Inertia::render('ProductShow', [
+            'product' => (new ProductResource($product))->resolve(),
+            'movements' => StockMovementResource::collection($movements)->resolve(),
         ]);
     }
 

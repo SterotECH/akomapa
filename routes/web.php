@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductsController;
@@ -21,6 +22,8 @@ Route::middleware('auth')->group(function (): void {
     // Products
     Route::get('/products', [ProductsController::class, 'index'])
         ->name('products.index');
+    Route::get('/products/{product}', [ProductsController::class, 'show'])
+        ->name('products.show');
     Route::post('/products', [ProductsController::class, 'store'])
         ->name('products.store');
     Route::patch('/products/{product}', [ProductsController::class, 'update'])
@@ -31,6 +34,16 @@ Route::middleware('auth')->group(function (): void {
         ->name('products.import');
     Route::get('/products/import/template', [ProductsController::class, 'importTemplate'])
         ->name('products.import-template');
+
+    // Categories
+    Route::get('/categories', [CategoriesController::class, 'index'])
+        ->name('categories.index');
+    Route::post('/categories', [CategoriesController::class, 'store'])
+        ->name('categories.store');
+    Route::patch('/categories/{category}', [CategoriesController::class, 'update'])
+        ->name('categories.update');
+    Route::delete('/categories/{category}', [CategoriesController::class, 'destroy'])
+        ->name('categories.destroy');
 
     // Stock
     Route::get('/stock', [StockController::class, 'index'])

@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { dashboard, logout } from '@/routes';
 import { index as pos } from '@/routes/pos';
 import { index as products } from '@/routes/products';
+import { index as categories } from '@/routes/categories';
 import { index as reports } from '@/routes/reports';
 import { index as stock } from '@/routes/stock';
 
@@ -17,6 +18,7 @@ const nav: { name: IconName; label: string; href: string }[] = [
     { name: 'dashboard', label: 'Dashboard', href: dashboard.url() },
     { name: 'pos', label: 'POS', href: pos.url() },
     { name: 'products', label: 'Products', href: products.url() },
+    { name: 'categories', label: 'Categories', href: categories.url() },
     { name: 'stock', label: 'Stock', href: stock.url() },
     { name: 'reports', label: 'Reports', href: reports.url() },
 ];

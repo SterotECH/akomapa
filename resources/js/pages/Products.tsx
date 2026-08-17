@@ -1,4 +1,4 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
@@ -21,7 +21,7 @@ import {
 import { ToastStack, useToasts } from '@/components/Toast';
 import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
-import { store as productsStore, update as productsUpdate, deactivate as productsDeactivate } from '@/routes/products';
+import { store as productsStore, show as productsShow, update as productsUpdate, deactivate as productsDeactivate } from '@/routes/products';
 import type { Category, Product } from '@/types';
 
 type ProductsPageProps = {
@@ -406,6 +406,12 @@ export default function Products({
                                             </Cell>
                                             <Cell align="right">
                                                 <span className="flex items-center justify-end gap-1">
+                                                    <Link
+                                                        href={productsShow.url(product.id)}
+                                                        className="inline-flex min-h-8 items-center gap-1 rounded-md px-2.5 text-label font-semibold text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-raisin"
+                                                    >
+                                                        View
+                                                    </Link>
                                                     <Button
                                                         variant="plain"
                                                         size="sm"
