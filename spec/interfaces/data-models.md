@@ -67,6 +67,8 @@ type ProductSummary = {
 type Sale = {
   id: string            // ULID
   sale_number: string
+  customer_id: string | null  // ULID, optional
+  customer?: CustomerSummary  // when expanded
   sold_at: string           // ISO-8601
   total: number             // integer pesewas
   items_count: number
@@ -82,6 +84,24 @@ type SaleLineItem = {
   quantity: number
   unit_price: number        // pesewas; may be overridden (FR-3.3)
   line_total: number        // pesewas
+}
+```
+
+## 4a. Customer
+
+```ts
+type Customer = {
+  id: string            // ULID
+  name: string
+  phone: string | null
+  created_at: string | null
+  updated_at: string | null
+}
+
+type CustomerSummary = {
+  id: string            // ULID
+  name: string
+  phone: string | null
 }
 ```
 

@@ -22,5 +22,10 @@ class DatabaseSeeder extends Seeder
                 'password' => config('shop.owner.password'),
             ],
         );
+
+        $this->call([
+            CategorySeeder::class,
+            ProductSeeder::class,
+        ]);
     }
 }

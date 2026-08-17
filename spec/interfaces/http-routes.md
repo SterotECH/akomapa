@@ -32,6 +32,7 @@
 `POST /sales` body (camelCase):
 ```jsonc
 {
+  "customer_id": "01J1Z...ULID",  // optional
   "items": [
     { "product_id": "01J1Z...ULID", "quantity": 2, "unit_price": 4500 } // unit_price optional; default = selling price
   ],
@@ -40,7 +41,8 @@
 ```
 Validation: at least one item; `product_id` exists (ULID), is active, and is a
 valid ULID; `quantity` ≥ 1; total requested per product must not exceed
-`stock_on_hand` (NFR-3); `unit_price` ≥ 0.
+`stock_on_hand` (NFR-3); `unit_price` ≥ 0. `customer_id` optional; when provided
+must reference an existing Customer.
 
 ## 3. Products / Catalog
 
@@ -56,6 +58,18 @@ valid ULID; `quantity` ≥ 1; total requested per product must not exceed
 | GET | /products/import/template | `products.import-template` | Download template CSV |
 
 Validation (store/update): `sku` required + unique; `name` required; `barcode` nullable + unique; `unit` required; `cost_price`/`selling_price` numeric ≥ 0; `reorder_threshold` integer ≥ 0; `category_id` nullable FK. `sku` and `barcode` may not be changed to a value already in use (FR-1.2).
+
+## 3a. Customers
+
+| Method | URI | Name | Purpose |
+| --- | --- | --- | --- |
+| GET | `/api/customers` | `customers.index` | Search customers by name/phone (POS autocomplete) |
+| POST | `/customers` | `customers.store` | Create new customer (inline from POS) |
+| GET | `/customers/{customer}` | `customers.show` | Customer detail |
+
+`GET /api/customers?search=` returns up to 10 matches by name or phone (fuzzy).
+
+`POST /customers` body: `name` required; `phone` nullable, unique when present.
 
 ## 4. Stock Management
 

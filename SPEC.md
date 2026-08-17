@@ -81,6 +81,64 @@ Order rules: T1→T3 foundation. T6 flagship after primitives, before others. T4
 | id  | date | cause | fix |
 | --- | ---- | ----- | --- |
 
+## Backend Tasks (phased)
+
+Reference: SRS v0.2, `spec/interfaces/*.md`, `spec/features/*.md`.
+
+### Phase 1 — Data Layer
+
+| id   | status | task                                                                 | cites                          |
+| ---- | ------ | -------------------------------------------------------------------- | ------------------------------ |
+| BT1  | x      | migrations: categories, products, stock_movements, customers, sales, sale_line_items | data-models.md, SRS §5        |
+| BT2  | x      | Eloquent models: Category, Product, Customer, StockMovement, Sale, SaleLineItem (ULIDs, relationships, scopes) | data-models.md, ADR-0008      |
+| BT3  | x      | Product stock_on_hand accessor: Σ stock_movements.quantity (derived, not stored) | V4, data-models.md §1         |
+| BT4  | x      | Form Requests: ProductStoreRequest, ProductUpdateRequest             | http-routes.md §3             |
+| BT5  | x      | Form Requests: SaleStoreRequest, RestockRequest, AdjustmentRequest   | http-routes.md §2, §4         |
+| BT6  | x      | Eloquent API Resources: ProductResource, CategoryResource, StockMovementResource, SaleResource, SaleLineItemResource, CustomerResource | data-models.md                |
+| BT7  | x      | Factories: CategoryFactory, ProductFactory, CustomerFactory, StockMovementFactory, SaleFactory, SaleLineItemFactory | tests, seeding                |
+| BT8  | x      | Seeders: realistic Ghanaian catalog (~20 products, 5 categories)     | SRS, PRODUCT.md               |
+
+### Phase 2 — POS & Sales
+
+| id   | status | task                                                                 | cites                          |
+| ---- | ------ | -------------------------------------------------------------------- | ------------------------------ |
+| BT9  | .      | ProductsController: index (real data), store, update, deactivate     | http-routes.md §3, FR-1.1     |
+| BT10 | .      | StockController: index (real data), restock, adjustments             | http-routes.md §4, FR-2.1     |
+| BT11 | .      | PosController: index (active products + categories + today_sales)    | http-routes.md §2, FR-3.1     |
+| BT12 | .      | SalesController: store (complete sale with line items, decrement stock) | http-routes.md §2, FR-3.4, V4 |
+| BT13 | .      | SalesController: void (same-day only, restore stock)                 | http-routes.md §2, FR-3.5, V5 |
+| BT14 | .      | DashboardController: index (today summary + recent movements + low stock) | SRS §3.4, screen signatures   |
+| BT15 | .      | ReportsController: stock-levels, low-stock, sales reports            | http-routes.md §5, report-contracts.md |
+| BT16 | .      | Stock movement ledger: auto-create movement rows on sale/restock/adjust | V5, V6, FR-2.5                |
+| BT17 | .      | Over-sell guard: DB-level check + controller validation (NFR-3)     | SRS NFR-3, V4                 |
+
+### Phase 3 — Import & Reports
+
+| id   | status | task                                                                 | cites                          |
+| ---- | ------ | -------------------------------------------------------------------- | ------------------------------ |
+| BT18 | .      | install maatwebsite/excel, configure import pipeline                 | import-contracts.md            |
+| BT19 | .      | ProductImport: upsert by SKU, validate rows, error report            | FR-1.3, import-contracts.md §1 |
+| BT20 | .      | StockImport: restock rows, validate, error report                    | FR-2.2, import-contracts.md §2 |
+| BT21 | .      | Import template download (GET /products/import/template)             | import-contracts.md §1         |
+| BT22 | .      | Reports: stock-levels query (all products, cost/selling value)       | report-contracts.md §1         |
+| BT23 | .      | Reports: low-stock query (stock_on_hand ≤ threshold, by shortfall)  | report-contracts.md §2         |
+| BT24 | .      | Reports: sales query (date range, summary + items-sold breakdown)   | report-contracts.md §3         |
+
+### Phase 4 — Backup & Polish
+
+| id   | status | task                                                                 | cites                          |
+| ---- | ------ | -------------------------------------------------------------------- | ------------------------------ |
+| BT25 | .      | BackupController: SQLite snapshot download                           | NFR-5, import-contracts.md §3  |
+| BT26 | .      | Flash messages: wire HandleInertiaRequests to share flash.success/error | data-models.md §7             |
+| BT27 | .      | Wire frontend to real data: replace mock-data imports with Inertia props | screen signatures §I           |
+| BT28 | .      | Feature tests: Products CRUD, Stock restock/adjust, Sales store/void | SRS, all FRs                   |
+| BT29 | .      | Feature tests: Reports (stock-levels, low-stock, sales)              | FR-4.1–4.3                     |
+| BT30 | .      | Feature tests: Import (product upsert, stock restock, error report)  | FR-1.3, FR-2.2                 |
+| BT31 | .      | Unit tests: stock_on_hand accessor, over-sell guard, sale total      | V4, NFR-3                      |
+| BT32 | .      | Pest + Pint + types:check clean on all new code                      | all                            |
+
+Phase order: P1 → P2 → P3 → P4. Each phase is shippable independently.
+
 ## H · Hand-off
 
 Pending decisions before the prototype becomes a real stack:
