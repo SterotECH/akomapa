@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,6 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/stock', [StockController::class, 'index'])
         ->name('stock.index');
 
-    Route::inertia('/reports', 'Placeholder', ['title' => 'Reports', 'task' => 'T9'])
+    Route::get('/reports', [ReportsController::class, 'index'])
         ->name('reports.index');
 });

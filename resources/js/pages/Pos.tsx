@@ -270,7 +270,7 @@ export default function Pos({
         <>
             <Head title="POS" />
 
-            <div className="flex h-[calc(100dvh-10rem)] flex-col gap-4 sm:h-[calc(100dvh-11rem)] md:flex-row md:overflow-hidden lg:h-[calc(100dvh-7rem)]">
+            <div className="flex h-[calc(100dvh-10rem)] flex-col gap-4 sm:h-[calc(100dvh-11rem)] md:overflow-hidden lg:h-[calc(100dvh-7rem)] lg:flex-row">
                 <section className="flex min-h-0 flex-1 flex-col gap-3">
                     <div className="flex items-center gap-2">
                         <SearchField
@@ -302,7 +302,7 @@ export default function Pos({
                                 type="button"
                                 onClick={() => setCategoryId(null)}
                                 className={cn(
-                                    'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast',
+                                    'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast md:min-h-11',
                                     categoryId === null
                                         ? 'border-amber bg-amber/15 text-amber-deep'
                                         : 'border-line bg-white text-spanish-gray hover:bg-raisin/5 hover:text-raisin',
@@ -323,7 +323,7 @@ export default function Pos({
                                             )
                                         }
                                         className={cn(
-                                            'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast',
+                                            'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast md:min-h-11',
                                             isActive
                                                 ? 'border-amber bg-amber/15 text-amber-deep'
                                                 : 'border-line bg-white text-spanish-gray hover:bg-raisin/5 hover:text-raisin',
@@ -416,7 +416,7 @@ export default function Pos({
                     </div>
                 </section>
 
-                <aside className="hidden md:block md:min-h-0 md:w-96 md:shrink-0">
+                <aside className="hidden md:block md:max-h-80 md:shrink-0 lg:max-h-none lg:w-96">
                     <Card className="flex h-full flex-col overflow-hidden">
                         <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
                             <div className="flex items-center gap-2">
@@ -593,7 +593,7 @@ function CartLines({
                                     type="button"
                                     onClick={() => onRemove(line.product_id)}
                                     aria-label={`Remove ${line.name} from cart`}
-                                    className="rounded-md p-1 text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-danger"
+                                    className="flex min-h-10 min-w-10 items-center justify-center rounded-md text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-danger"
                                 >
                                     <Icon name="close" className="size-4" />
                                 </button>
@@ -603,7 +603,7 @@ function CartLines({
                                         type="button"
                                         onClick={() => onDecrement(line)}
                                         aria-label={`Decrease quantity of ${line.name}`}
-                                        className="p-1.5 text-raisin transition-colors duration-fast hover:bg-raisin/5"
+                                        className="flex min-h-10 min-w-10 items-center justify-center rounded-md text-raisin transition-colors duration-fast hover:bg-raisin/5"
                                     >
                                         <Icon name="minus" className="size-4" />
                                     </button>
@@ -617,7 +617,7 @@ function CartLines({
                                         type="button"
                                         onClick={() => onIncrement(line)}
                                         aria-label={`Increase quantity of ${line.name}`}
-                                        className="p-1.5 text-raisin transition-colors duration-fast hover:bg-raisin/5"
+                                        className="flex min-h-10 min-w-10 items-center justify-center rounded-md text-raisin transition-colors duration-fast hover:bg-raisin/5"
                                     >
                                         <Icon name="plus" className="size-4" />
                                     </button>

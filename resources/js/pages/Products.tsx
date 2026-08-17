@@ -322,7 +322,7 @@ export default function Products({
                             type="button"
                             onClick={() => setCategoryId(null)}
                             className={cn(
-                                'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast',
+                                'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast md:min-h-11',
                                 categoryId === null
                                     ? 'border-amber bg-amber/15 text-amber-deep'
                                     : 'border-line bg-white text-spanish-gray hover:bg-raisin/5 hover:text-raisin',
@@ -343,7 +343,7 @@ export default function Products({
                                         )
                                     }
                                     className={cn(
-                                        'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast',
+                                        'shrink-0 rounded-full border px-3 py-1.5 text-label font-semibold transition-colors duration-fast md:min-h-11',
                                         isActive
                                             ? 'border-amber bg-amber/15 text-amber-deep'
                                             : 'border-line bg-white text-spanish-gray hover:bg-raisin/5 hover:text-raisin',

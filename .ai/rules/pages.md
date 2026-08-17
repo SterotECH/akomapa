@@ -3,6 +3,7 @@ paths:
     - resources/js/pages/Pos.tsx
     - resources/js/pages/Products.tsx
     - resources/js/pages/Stock.tsx
+    - resources/js/pages/Reports.tsx
 ---
 
 # Pages
@@ -18,3 +19,7 @@ The Products page keeps its own `catalog` in useState seeded from mock-data; add
 ## Stock forms live in drawers; catalog/movements are per-page mock state
 
 Stock keeps its own `catalog` (seeded from activeProducts) and `movements` (seeded from stockMovements) in useState; mutations do NOT propagate to Products/POS (no shared store). Both forms (restock, adjustment) live in Drawers opened by the page-header buttons; the low-stock "Restock" shortcut opens the restock Drawer prefilled via restockPresetId. New movement ids come from `createMockId()` in lib/mock-id.ts. Restock uses the date field via dateToIso(); adjustments must never drive stock_on_hand below 0 (inline error + danger toast, V6); low-stock recomputes live.
+
+## Reports is per-page mock state; tabs/range are client-side
+
+Reports seeds products (activeProducts) and sales (mockSales) from mock-data.ts in useState-free prop defaults; tabs and the Sales from/to range are client state, no backend round-trips. mockSales is a generated Sale[] register spanning the last 7 days (sale_number TS-2026-xxxx, line_items with real totals). Print: the page wraps content in .print-area with a print-only .report-header (wordmark + "Ablekuma 10 Plot, GC-104-444"); controls carry .no-print. Print stylesheet (resources/css/print.css) forces black text + transparent backgrounds so dark theme never leaks into print. Money via Money/formatGhs, tabular-nums (V8).

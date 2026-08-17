@@ -239,7 +239,7 @@ export default function Dashboard({
                                 </div>
                                 <Link
                                     href={reports.url()}
-                                    className="inline-flex items-center gap-1 text-label font-semibold text-raisin transition-colors duration-fast hover:text-amber-deep"
+                                    className="inline-flex items-center gap-1 rounded-md px-2 py-2 -ml-2 text-label font-semibold text-raisin transition-colors duration-fast hover:bg-raisin/5 hover:text-amber-deep"
                                 >
                                     Sales report
                                     <Icon
@@ -335,7 +335,7 @@ export default function Dashboard({
                                 </h2>
                                 <Link
                                     href={stock.url()}
-                                    className="inline-flex items-center gap-1 text-label font-semibold text-raisin transition-colors duration-fast hover:text-amber-deep"
+                                    className="inline-flex items-center gap-1 rounded-md px-2 py-2 -mr-2 text-label font-semibold text-raisin transition-colors duration-fast hover:bg-raisin/5 hover:text-amber-deep"
                                 >
                                     View all
                                     <Icon
@@ -344,11 +344,10 @@ export default function Dashboard({
                                     />
                                 </Link>
                             </div>
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <HeaderCell>Product</HeaderCell>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <HeaderCell>Product</HeaderCell>
                                             <HeaderCell>Type</HeaderCell>
                                             <HeaderCell align="right">
                                                 Qty

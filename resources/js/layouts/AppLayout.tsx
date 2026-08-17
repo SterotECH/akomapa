@@ -32,10 +32,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
     function toggleSidebar() {
         setSidebarOpen((open) => {
-            localStorage.setItem(
-                SIDEBAR_STORAGE_KEY,
-                open ? '0' : '1',
-            );
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, open ? '0' : '1');
 
             return !open;
         });
@@ -49,9 +46,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
                         type="button"
                         onClick={toggleSidebar}
                         aria-label={
-                            sidebarOpen
-                                ? 'Hide sidebar'
-                                : 'Show sidebar'
+                            sidebarOpen ? 'Hide sidebar' : 'Show sidebar'
                         }
                         title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
                         className="hidden rounded-md p-2 text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-raisin lg:block"
@@ -92,7 +87,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
             <aside
                 className={cn(
-                    'app-sidebar fixed bottom-0 left-0 top-16 z-20 hidden w-32 flex-col bg-chrome px-2 py-6 text-chrome-text transition-transform duration-fast lg:flex',
+                    'app-sidebar fixed top-16 bottom-0 left-0 z-20 hidden w-32 flex-col bg-chrome px-2 py-6 text-chrome-text transition-transform duration-fast lg:flex',
                     sidebarOpen ? 'translate-x-0' : '-translate-x-full',
                 )}
             >
@@ -115,9 +110,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
                                     <span className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-full bg-amber" />
                                 )}
                                 <Icon name={item.name} className="size-10" />
-                                <span className="text-label">
-                                    {item.label}
-                                </span>
+                                <span className="text-label">{item.label}</span>
                             </Link>
                         );
                     })}
@@ -136,7 +129,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
                 </div>
             </aside>
 
-            <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-chrome-text/10 bg-chrome lg:hidden">
+            <nav className="app-bottomnav fixed inset-x-0 bottom-0 z-20 flex border-t border-chrome-text/10 bg-chrome lg:hidden">
                 {nav.map((item) => {
                     const isActive = item.href === active.href;
 

@@ -1,4 +1,12 @@
-import type { Category, Product, ProductSummary, StockMovement } from '@/types';
+import { createMockId } from '@/lib/mock-id';
+import type {
+    Category,
+    Product,
+    ProductSummary,
+    Sale,
+    SaleLineItem,
+    StockMovement,
+} from '@/types';
 
 export const categories: Category[] = [
     { id: '01KZSJQXP29WW1E3W5Q7Y6MDZY', name: 'Beverages' },
@@ -416,6 +424,287 @@ const movement = (
 
 const byId = (id: string): Product =>
     products.find((product) => product.id === id) as Product;
+
+const sell = (product: Product, quantity: number) => ({ product, quantity });
+
+const atHour = (daysAgo: number, hour: number, minute: number): string => {
+    const date = new Date(Date.now() - daysAgo * DAY_MS);
+    date.setHours(hour, minute, 0, 0);
+
+    return date.toISOString();
+};
+
+type SaleSeed = {
+    daysAgo: number;
+    hour: number;
+    minute: number;
+    rows: Array<{ product: Product; quantity: number }>;
+};
+
+const saleSeeds: SaleSeed[] = [
+    {
+        daysAgo: 0,
+        hour: 8,
+        minute: 12,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME03'), 10),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0E'), 20),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0A'), 6),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0B'), 6),
+        ],
+    },
+    {
+        daysAgo: 0,
+        hour: 9,
+        minute: 50,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME08'), 6),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME09'), 4),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0M'), 4),
+        ],
+    },
+    {
+        daysAgo: 0,
+        hour: 11,
+        minute: 35,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0N'), 2),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0P'), 2),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0G'), 6),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0H'), 4),
+        ],
+    },
+    {
+        daysAgo: 0,
+        hour: 13,
+        minute: 10,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0E'), 40),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME03'), 20),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0A'), 24),
+        ],
+    },
+    {
+        daysAgo: 0,
+        hour: 15,
+        minute: 20,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME04'), 4),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME05'), 2),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0K'), 2),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME06'), 6),
+        ],
+    },
+    {
+        daysAgo: 0,
+        hour: 18,
+        minute: 45,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0C'), 12),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0D'), 12),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME07'), 4),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0J'), 6),
+        ],
+    },
+    {
+        daysAgo: 1,
+        hour: 8,
+        minute: 30,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME04'), 6),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME06'), 6),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0G'), 4),
+        ],
+    },
+    {
+        daysAgo: 1,
+        hour: 12,
+        minute: 5,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0N'), 3),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0P'), 3),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0M'), 6),
+        ],
+    },
+    {
+        daysAgo: 1,
+        hour: 17,
+        minute: 40,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0A'), 12),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0C'), 12),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0D'), 12),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME03'), 12),
+        ],
+    },
+    {
+        daysAgo: 2,
+        hour: 9,
+        minute: 15,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME09'), 3),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME08'), 4),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0J'), 4),
+        ],
+    },
+    {
+        daysAgo: 2,
+        hour: 14,
+        minute: 30,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME05'), 2),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0K'), 2),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME07'), 6),
+        ],
+    },
+    {
+        daysAgo: 2,
+        hour: 19,
+        minute: 0,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0B'), 24),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0E'), 20),
+        ],
+    },
+    {
+        daysAgo: 3,
+        hour: 8,
+        minute: 45,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME06'), 8),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME04'), 4),
+        ],
+    },
+    {
+        daysAgo: 3,
+        hour: 12,
+        minute: 30,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0N'), 4),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0P'), 2),
+        ],
+    },
+    {
+        daysAgo: 3,
+        hour: 16,
+        minute: 55,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME03'), 30),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0C'), 12),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0A'), 12),
+        ],
+    },
+    {
+        daysAgo: 4,
+        hour: 10,
+        minute: 20,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0G'), 6),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0H'), 6),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0M'), 4),
+        ],
+    },
+    {
+        daysAgo: 4,
+        hour: 13,
+        minute: 45,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME09'), 2),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME08'), 3),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0J'), 3),
+        ],
+    },
+    {
+        daysAgo: 4,
+        hour: 18,
+        minute: 15,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME05'), 3),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0K'), 2),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME04'), 4),
+        ],
+    },
+    {
+        daysAgo: 5,
+        hour: 9,
+        minute: 0,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0A'), 12),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0B'), 12),
+        ],
+    },
+    {
+        daysAgo: 5,
+        hour: 11,
+        minute: 40,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME07'), 5),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0F'), 3),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0N'), 1),
+        ],
+    },
+    {
+        daysAgo: 5,
+        hour: 17,
+        minute: 20,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0C'), 12),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0D'), 12),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME03'), 24),
+        ],
+    },
+    {
+        daysAgo: 6,
+        hour: 8,
+        minute: 20,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME04'), 6),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME06'), 6),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0G'), 4),
+        ],
+    },
+    {
+        daysAgo: 6,
+        hour: 12,
+        minute: 50,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0P'), 4),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0M'), 5),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME09'), 2),
+        ],
+    },
+    {
+        daysAgo: 6,
+        hour: 18,
+        minute: 30,
+        rows: [
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0A'), 18),
+            sell(byId('01KZSJQXP29WW1E3W5Q7Y6ME0E'), 24),
+        ],
+    },
+];
+
+export const mockSales: Sale[] = saleSeeds.map((seed, index) => {
+    const lineItems: SaleLineItem[] = seed.rows.map((row) => ({
+        id: createMockId(),
+        product_id: row.product.id,
+        product_snapshot: `${row.product.name} · ${row.product.unit}`,
+        quantity: row.quantity,
+        unit_price: row.product.selling_price,
+        line_total: row.product.selling_price * row.quantity,
+    }));
+
+    return {
+        id: createMockId(),
+        sale_number: `TS-2026-${String(184 - index).padStart(4, '0')}`,
+        sold_at: atHour(seed.daysAgo, seed.hour, seed.minute),
+        total: lineItems.reduce((sum, line) => sum + line.line_total, 0),
+        items_count: lineItems.reduce((sum, line) => sum + line.quantity, 0),
+        voided_at: null,
+        void_reason: null,
+        line_items: lineItems,
+    };
+});
 
 export const recentMovements: StockMovement[] = [
     movement(

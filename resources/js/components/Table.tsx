@@ -13,10 +13,12 @@ export function Table({
     ...props
 }: PropsWithChildren<HTMLAttributes<HTMLTableElement>>) {
     return (
-        <table
-            className={cn('w-full border-collapse text-body', className)}
-            {...props}
-        />
+        <div className="w-full overflow-x-auto">
+            <table
+                className={cn('w-full border-collapse text-body', className)}
+                {...props}
+            />
+        </div>
     );
 }
 
@@ -61,7 +63,7 @@ export function HeaderCell({
         <th
             scope="col"
             className={cn(
-                'px-3 py-2.5 text-label font-semibold tracking-wide text-spanish-gray uppercase',
+                'px-3 py-2.5 text-label font-semibold tracking-wide text-spanish-gray uppercase whitespace-nowrap',
                 align === 'right' && 'text-right',
                 align === 'center' && 'text-center',
                 className,
@@ -79,7 +81,7 @@ export function Cell({ align = 'left', className, ...props }: CellProps) {
     return (
         <td
             className={cn(
-                'px-3 py-3 text-raisin',
+                'px-3 py-3 text-raisin whitespace-nowrap',
                 align === 'right' && 'text-right tabular-nums',
                 align === 'center' && 'text-center',
                 className,

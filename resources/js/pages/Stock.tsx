@@ -274,7 +274,7 @@ export default function Stock({
                                 setMovementFilter(event.target.value)
                             }
                             aria-label="Filter movements by product"
-                            className="rounded-sm border border-line bg-white px-2.5 py-1.5 text-label text-raisin transition-shadow duration-fast outline-none focus:ring-2 focus:ring-amber"
+                            className="rounded-sm border border-line bg-white px-2.5 py-2 text-label text-raisin transition-shadow duration-fast outline-none focus:ring-2 focus:ring-amber"
                         >
                             <option value="">All products</option>
                             {catalog.map((product) => (
@@ -640,7 +640,7 @@ function RestockDrawer({
                                     type="button"
                                     onClick={() => removeLine(line.product.id)}
                                     aria-label={`Remove ${line.product.name} from receive list`}
-                                    className="rounded-md p-1 text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-danger"
+                                    className="flex min-h-10 min-w-10 items-center justify-center rounded-md text-spanish-gray transition-colors duration-fast hover:bg-raisin/5 hover:text-danger"
                                 >
                                     <Icon name="close" className="size-4" />
                                 </button>

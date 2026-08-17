@@ -68,8 +68,8 @@ V12: ⊥ real data in screenshots; synthetic labeled
 | T6  | x      | POS screen: grid, cart, scan, checkout                                                             | V3,V4,V7,V8 |
 | T7  | x      | Products screen: list/filter, add/edit drawer, deactivate                                          | V1,V2,V8    |
 | T8  | x      | Stock screen: restock, movements, low-stock, adjustment                                            | V3,V5,V6,V8 |
-| T9  | .      | Reports screen: 3 tabs, range, print stylesheet                                                    | V8,V12      |
-| T10 | .      | mock-data module + route wiring                                                                    | V12         |
+| T9  | x      | Reports screen: 3 tabs, range, print stylesheet                                                    | V8,V12      |
+| T10 | x      | mock-data module + route wiring                                                                    | V12         |
 | T11 | .      | responsive tablet pass (breakpoints, touch targets)                                                | V10,V11     |
 | T12 | .      | screenshot pass: detect.mjs per screen + DESIGN.md carbonize                                       | V9,V12      |
 | T13 | .      | hand-off: pending decisions, synthetic-data label                                                  | V12         |
