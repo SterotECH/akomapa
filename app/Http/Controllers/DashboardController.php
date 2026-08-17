@@ -32,6 +32,22 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
+        // Last 7 days sales for chart
+        $chartData = Sale::active()
+            ->where('sold_at', '>=', now()->subDays(6)->startOfDay())
+            ->selectRaw('date(sold_at) as date, COALESCE(SUM(total), 0) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->mapWithKeys(fn ($row) => [$row->date => $row->total]);
+
+        $salesChart = collect(range(0, 6))
+            ->map(fn ($i) => [
+                'label' => now()->subDays(6 - $i)->format('D'),
+                'value' => $chartData[now()->subDays(6 - $i)->format('Y-m-d')] ?? 0,
+            ])
+            ->toArray();
+
         return Inertia::render('Dashboard', [
             'today' => [
                 'sales_count' => $todaySales->count,
@@ -40,6 +56,7 @@ class DashboardController extends Controller
             ],
             'lowStock' => ProductResource::collection($lowStockProducts)->resolve(),
             'recentMovements' => StockMovementResource::collection($recentMovements)->resolve(),
+            'salesChart' => $salesChart,
         ]);
     }
 }

@@ -36,6 +36,7 @@ type DashboardPageProps = {
     today: TodaySummary;
     lowStock: Product[];
     recentMovements: StockMovement[];
+    salesChart: SalesPoint[];
 };
 
 const primaryLinkClasses =
@@ -120,6 +121,7 @@ export default function Dashboard({
     today,
     lowStock,
     recentMovements,
+    salesChart,
 }: DashboardPageProps) {
     const { gentle, wobbly } = useSprings();
     const hasSales = today.sales_count > 0;
@@ -186,6 +188,24 @@ export default function Dashboard({
                     </motion.div>
                 ))}
             </motion.div>
+
+            {salesChart.some((point) => point.value > 0) && (
+                <motion.div
+                    className="mt-6"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={gentle}
+                >
+                    <Card className="p-5">
+                        <div className="mb-4 flex items-center justify-between">
+                            <h2 className="text-headline text-raisin">
+                                Sales this week
+                            </h2>
+                        </div>
+                        <TrendChart data={salesChart} />
+                    </Card>
+                </motion.div>
+            )}
 
             {hasSales ? (
                 <>
@@ -286,22 +306,22 @@ export default function Dashboard({
                                     />
                                 </Link>
                             </div>
-                            <DataTable stickyHeader>
+                            <DataTable stickyHeader columns={[40, 22, 10, 14, 14]}>
                                 <TableHead>
                                     <TableRow>
                                         <HeaderCell>Product</HeaderCell>
                                         <HeaderCell>Type</HeaderCell>
                                         <HeaderCell align="right">Qty</HeaderCell>
-                                        <HeaderCell className="hidden lg:table-cell">When</HeaderCell>
-                                        <HeaderCell className="hidden lg:table-cell">Note</HeaderCell>
+                                        <HeaderCell>When</HeaderCell>
+                                        <HeaderCell>Note</HeaderCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {recentMovements.map((movement) => (
                                         <TableRow key={movement.id}>
-                                            <Cell className="max-w-48 min-w-0">
+                                            <Cell className="min-w-0">
                                                 <p className="truncate text-title text-raisin">
-                                                    {movement.product?.name}
+                                                    {movement.product?.name ?? '—'}
                                                 </p>
                                                 <p className="text-label text-spanish-gray">
                                                     {movement.product?.sku}
@@ -325,10 +345,10 @@ export default function Dashboard({
                                             >
                                                 {formatSignedQuantity(movement.quantity)}
                                             </Cell>
-                                            <Cell className="hidden text-spanish-gray lg:table-cell">
+                                            <Cell className="text-spanish-gray">
                                                 {formatWhen(movement.occurred_at)}
                                             </Cell>
-                                            <Cell className="hidden max-w-40 truncate text-spanish-gray lg:table-cell">
+                                            <Cell className="truncate text-spanish-gray">
                                                 {movement.note ?? '—'}
                                             </Cell>
                                         </TableRow>
