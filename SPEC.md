@@ -116,13 +116,13 @@ Reference: SRS v0.2, `spec/interfaces/*.md`, `spec/features/*.md`.
 
 | id   | status | task                                                                 | cites                          |
 | ---- | ------ | -------------------------------------------------------------------- | ------------------------------ |
-| BT18 | .      | install maatwebsite/excel, configure import pipeline                 | import-contracts.md            |
-| BT19 | .      | ProductImport: upsert by SKU, validate rows, error report            | FR-1.3, import-contracts.md §1 |
-| BT20 | .      | StockImport: restock rows, validate, error report                    | FR-2.2, import-contracts.md §2 |
-| BT21 | .      | Import template download (GET /products/import/template)             | import-contracts.md §1         |
-| BT22 | .      | Reports: stock-levels query (all products, cost/selling value)       | report-contracts.md §1         |
-| BT23 | .      | Reports: low-stock query (stock_on_hand ≤ threshold, by shortfall)  | report-contracts.md §2         |
-| BT24 | .      | Reports: sales query (date range, summary + items-sold breakdown)   | report-contracts.md §3         |
+| BT18 | x      | install maatwebsite/excel, configure import pipeline                 | import-contracts.md            |
+| BT19 | x      | ProductImport: upsert by SKU, validate rows, error report            | FR-1.3, import-contracts.md §1 |
+| BT20 | x      | StockImport: restock rows, validate, error report                    | FR-2.2, import-contracts.md §2 |
+| BT21 | x      | Import template download (GET /products/import/template)             | import-contracts.md §1         |
+| BT22 | x      | Reports: stock-levels query (all products, cost/selling value)       | report-contracts.md §1         |
+| BT23 | x      | Reports: low-stock query (stock_on_hand ≤ threshold, by shortfall)  | report-contracts.md §2         |
+| BT24 | x      | Reports: sales query (date range, summary + items-sold breakdown)   | report-contracts.md §3         |
 
 ### Phase 4 — Backup & Polish
 

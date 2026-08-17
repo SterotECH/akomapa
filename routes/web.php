@@ -26,6 +26,10 @@ Route::middleware('auth')->group(function (): void {
         ->name('products.update');
     Route::patch('/products/{product}/deactivate', [ProductsController::class, 'deactivate'])
         ->name('products.deactivate');
+    Route::post('/products/import', [ProductsController::class, 'import'])
+        ->name('products.import');
+    Route::get('/products/import/template', [ProductsController::class, 'importTemplate'])
+        ->name('products.import-template');
 
     // Stock
     Route::get('/stock', [StockController::class, 'index'])
@@ -34,6 +38,8 @@ Route::middleware('auth')->group(function (): void {
         ->name('stock.restock');
     Route::post('/stock/adjustments', [StockController::class, 'adjustments'])
         ->name('stock.adjustments');
+    Route::post('/stock/import', [StockController::class, 'import'])
+        ->name('stock.import');
 
     // Sales
     Route::post('/sales', [SalesController::class, 'store'])

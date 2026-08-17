@@ -6,12 +6,14 @@ use App\Http\Requests\AdjustmentRequest;
 use App\Http\Requests\RestockRequest;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\StockMovementResource;
+use App\Imports\StockImport;
 use App\Models\Product;
 use App\Models\StockMovement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StockController extends Controller
 {
@@ -80,5 +82,22 @@ class StockController extends Controller
         }
 
         return redirect()->route('stock.index')->with('success', 'Stock adjusted.');
+    }
+
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,xlsx', 'max:10240'],
+        ]);
+
+        $import = new StockImport;
+        Excel::import($import, $request->file('file'));
+
+        $message = "Imported: {$import->imported['success']} restocked.";
+        if ($import->imported['rejected'] > 0) {
+            $message .= " Rejected: {$import->imported['rejected']} rows.";
+        }
+
+        return redirect()->route('stock.index')->with('success', $message);
     }
 }
