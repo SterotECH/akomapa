@@ -106,18 +106,8 @@ class SalesController extends Controller
         }
 
         return DB::transaction(function () use ($sale) {
-            // Restore stock for each line item
+            // Remove the original sale stock movements to restore stock
             foreach ($sale->lineItems as $lineItem) {
-                StockMovement::create([
-                    'product_id' => $lineItem->product_id,
-                    'type' => StockMovement::TYPE_ADJUSTMENT,
-                    'quantity' => $lineItem->quantity,
-                    'occurred_at' => now(),
-                    'note' => "Void of sale {$sale->sale_number}",
-                    'sale_id' => $sale->id,
-                ]);
-
-                // Remove the original sale stock movement
                 StockMovement::where('product_id', $lineItem->product_id)
                     ->where('type', StockMovement::TYPE_SALE)
                     ->where('sale_id', $sale->id)

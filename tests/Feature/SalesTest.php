@@ -103,11 +103,10 @@ test('owner can void a same-day sale', function () {
         'voided_at' => now()->format('Y-m-d H:i:s'),
     ]);
 
-    // Stock should be restored
-    $this->assertDatabaseHas('stock_movements', [
+    // Sale stock movements should be deleted
+    $this->assertDatabaseMissing('stock_movements', [
         'product_id' => $product->id,
-        'type' => StockMovement::TYPE_ADJUSTMENT,
-        'quantity' => 3,
+        'type' => StockMovement::TYPE_SALE,
         'sale_id' => $sale->id,
     ]);
 });
