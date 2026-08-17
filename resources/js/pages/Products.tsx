@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
@@ -92,7 +92,7 @@ function parsePesewas(value: string): number | null {
 
 function validateForm(
     draft: ProductForm,
-    catalog: Product[],
+    products: Product[],
     editingId: string | null,
 ): FormErrors {
     const errors: FormErrors = {};
@@ -109,7 +109,7 @@ function validateForm(
     if (sku.length === 0) {
         errors.sku = 'Enter a SKU or code';
     } else if (
-        catalog.some(
+        products.some(
             (product) =>
                 product.sku.trim().toLowerCase() === sku &&
                 product.id !== editingId,
@@ -120,7 +120,7 @@ function validateForm(
 
     if (
         barcode.length > 0 &&
-        catalog.some(
+        products.some(
             (product) =>
                 product.barcode?.toLowerCase() === barcode &&
                 product.id !== editingId,
@@ -157,13 +157,12 @@ function validateForm(
 }
 
 export default function Products({
-    products: initialProducts,
+    products,
     categories,
     filters,
 }: ProductsPageProps) {
     const { gentle } = useSprings();
     const { toasts, push, dismiss } = useToasts();
-    const [catalog, setCatalog] = useState(initialProducts);
     const [search, setSearch] = useState(filters?.search ?? '');
     const [categoryId, setCategoryId] = useState<string | null>(filters?.category_id ?? null);
     const [drawer, setDrawer] = useState<DrawerState>({
@@ -177,7 +176,7 @@ export default function Products({
     const filtered = useMemo(() => {
         const term = search.trim().toLowerCase();
 
-        return catalog.filter((product) => {
+        return products.filter((product) => {
             const matchesCategory =
                 categoryId === null || product.category?.id === categoryId;
             const matchesSearch =
@@ -188,11 +187,11 @@ export default function Products({
 
             return matchesCategory && matchesSearch;
         });
-    }, [catalog, search, categoryId]);
+    }, [products, search, categoryId]);
 
     const activeCount = useMemo(
-        () => catalog.filter((product) => product.is_active).length,
-        [catalog],
+        () => products.filter((product) => product.is_active).length,
+        [products],
     );
 
     function openCreate() {
@@ -208,89 +207,56 @@ export default function Products({
     }
 
     function saveProduct(payload: ProductPayload) {
-        const category = payload.categoryId
-            ? (categories.find((item) => item.id === payload.categoryId) ??
-              null)
-            : null;
-
         if (drawer.product) {
-            const id = drawer.product.id;
-
-            setCatalog((items) =>
-                items.map((item) => {
-                    if (item.id !== id) {
-                        return item;
-                    }
-
-                    return {
-                        ...item,
-                        ...payload,
-                        category,
-                        is_low_stock:
-                            item.stock_on_hand <= payload.reorder_threshold,
-                        stock_value: payload.cost_price * item.stock_on_hand,
-                        updated_at: new Date().toISOString(),
-                    };
-                }),
-            );
-
-            push(`Saved ${payload.name}`, 'success');
-        } else {
-            const product: Product = {
-                id: createMockId(),
+            router.patch(route('products.update', drawer.product.id), {
                 ...payload,
-                category,
-                is_active: true,
-                stock_on_hand: 0,
-                is_low_stock: true,
-                stock_value: 0,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            };
-
-            setCatalog((items) => [...items, product]);
-            push(`Added ${payload.name}`, 'success');
+                category_id: payload.categoryId || null,
+            }, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    push(`Saved ${payload.name}`, 'success');
+                    closeDrawer();
+                },
+            });
+        } else {
+            router.post(route('products.store'), {
+                ...payload,
+                category_id: payload.categoryId || null,
+            }, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    push(`Added ${payload.name}`, 'success');
+                    closeDrawer();
+                },
+            });
         }
-
-        closeDrawer();
     }
 
     function confirmDeactivate() {
-        if (pendingDeactivate === null) {
-            return;
-        }
+        if (pendingDeactivate === null) return;
 
-        const product = pendingDeactivate;
-
-        setCatalog((items) =>
-            items.map((item) =>
-                item.id === product.id
-                    ? {
-                          ...item,
-                          is_active: false,
-                          updated_at: new Date().toISOString(),
-                      }
-                    : item,
-            ),
+        router.patch(
+            route('products.deactivate', pendingDeactivate.id),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    push(`Deactivated ${pendingDeactivate.name} — hidden from POS`, 'success');
+                    setPendingDeactivate(null);
+                },
+            },
         );
-        setPendingDeactivate(null);
-        push(`Deactivated ${product.name} — hidden from POS`, 'success');
     }
 
     function reactivate(product: Product) {
-        setCatalog((items) =>
-            items.map((item) =>
-                item.id === product.id
-                    ? {
-                          ...item,
-                          is_active: true,
-                          updated_at: new Date().toISOString(),
-                      }
-                    : item,
-            ),
+        router.patch(
+            route('products.update', product.id),
+            { is_active: true },
+            {
+                preserveScroll: true,
+                onSuccess: () => push(`Reactivated ${product.name}`, 'success'),
+            },
         );
-
-        push(`Reactivated ${product.name}`, 'success');
     }
 
     return (
@@ -352,7 +318,7 @@ export default function Products({
                     </div>
 
                     <p className="hidden shrink-0 text-label text-spanish-gray lg:block">
-                        {filtered.length} of {catalog.length} products ·{' '}
+                        {filtered.length} of {products.length} products ·{' '}
                         {activeCount} active
                     </p>
                 </div>
@@ -500,7 +466,7 @@ export default function Products({
                 <ProductForm
                     product={drawer.product}
                     categories={categories}
-                    catalog={catalog}
+                    products={products}
                     onSave={saveProduct}
                 />
             </Drawer>
@@ -539,12 +505,12 @@ export default function Products({
 function ProductForm({
     product,
     categories,
-    catalog,
+    products,
     onSave,
 }: {
     product: Product | null;
     categories: Category[];
-    catalog: Product[];
+    products: Product[];
     onSave: (payload: ProductPayload) => void;
 }) {
     const [draft, setDraft] = useState<ProductForm>(() =>
@@ -571,7 +537,7 @@ function ProductForm({
         event.preventDefault();
 
         const editingId = product?.id ?? null;
-        const nextErrors = validateForm(draft, catalog, editingId);
+        const nextErrors = validateForm(draft, products, editingId);
 
         setErrors(nextErrors);
 

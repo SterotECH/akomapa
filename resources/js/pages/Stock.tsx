@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
@@ -70,42 +70,13 @@ function suggestedQuantity(product: Product): number {
     return Math.max(product.reorder_threshold - product.stock_on_hand, 1);
 }
 
-function movementSummary(product: Product): StockMovement['product'] {
-    return {
-        id: product.id,
-        sku: product.sku,
-        name: product.name,
-        unit: product.unit,
-    };
-}
-
-function buildMovement(
-    product: Product,
-    type: MovementType,
-    quantity: number,
-    note: string | null,
-    occurredAt: string,
-): StockMovement {
-    return {
-        id: createMockId(),
-        product_id: product.id,
-        type,
-        quantity,
-        occurred_at: occurredAt,
-        note,
-        sale_id: null,
-        product: movementSummary(product),
-    };
-}
-
 export default function Stock({
-    products: initialProducts,
+    products,
     movements: initialMovements,
     lowStock,
 }: StockPageProps) {
     const { gentle } = useSprings();
     const { toasts, push, dismiss } = useToasts();
-    const [catalog, setCatalog] = useState(initialProducts);
     const [movements, setMovements] = useState(initialMovements);
     const [movementFilter, setMovementFilter] = useState('');
     const [restockOpen, setRestockOpen] = useState(false);
@@ -123,61 +94,34 @@ export default function Stock({
         );
     }, [movements, movementFilter]);
 
-    function changeStock(productId: string, delta: number) {
-        setCatalog((items) =>
-            items.map((item) => {
-                if (item.id !== productId) {
-                    return item;
-                }
-
-                const stock_on_hand = item.stock_on_hand + delta;
-
-                return {
-                    ...item,
-                    stock_on_hand,
-                    is_low_stock: stock_on_hand <= item.reorder_threshold,
-                    stock_value: item.cost_price * stock_on_hand,
-                    updated_at: new Date().toISOString(),
-                };
-            }),
-        );
-    }
-
     function openRestock(presetId: string | null) {
         setRestockPresetId(presetId);
         setRestockOpen(true);
     }
 
     function submitRestock(lines: RestockLine[], note: string, date: string) {
-        if (lines.length === 0) {
-            return;
-        }
+        if (lines.length === 0) return;
 
-        const noteText = note.trim() || null;
-        const occurredAt = dateToIso(date);
-        const totalValue = lines.reduce(
-            (sum, line) => sum + line.product.cost_price * line.quantity,
-            0,
-        );
-
-        lines.forEach((line) => {
-            changeStock(line.product.id, line.quantity);
-            setMovements((current) => [
-                buildMovement(
-                    line.product,
-                    'restock',
-                    line.quantity,
-                    noteText,
-                    occurredAt,
-                ),
-                ...current,
-            ]);
-        });
-
-        setRestockOpen(false);
-        push(
-            `Received ${lines.length} item${lines.length === 1 ? '' : 's'} · ${formatGhs(totalValue)}`,
-            'success',
+        router.post(
+            route('stock.restock'),
+            {
+                items: lines.map((line) => ({
+                    product_id: line.product.id,
+                    quantity: line.quantity,
+                })),
+                note: note.trim() || null,
+                occurred_at: dateToIso(date),
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setRestockOpen(false);
+                    push(
+                        `Received ${lines.length} item${lines.length === 1 ? '' : 's'}`,
+                        'success',
+                    );
+                },
+            },
         );
     }
 
@@ -186,27 +130,20 @@ export default function Stock({
         quantity: number,
         reason: string,
     ) {
-        const product = catalog.find((item) => item.id === productId);
-
-        if (product === undefined) {
-            return;
-        }
-
-        changeStock(product.id, quantity);
-        setMovements((current) => [
-            buildMovement(
-                product,
-                'adjustment',
-                quantity,
-                reason,
-                new Date().toISOString(),
-            ),
-            ...current,
-        ]);
-        setAdjustOpen(false);
-        push(
-            `Adjusted ${product.name} by ${formatSignedQuantity(quantity)}`,
-            'success',
+        router.post(
+            route('stock.adjustments'),
+            {
+                items: [{ product_id: productId, quantity }],
+                note: reason.trim() || null,
+                occurred_at: new Date().toISOString(),
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setAdjustOpen(false);
+                    push(`Adjusted stock by ${formatSignedQuantity(quantity)}`, 'success');
+                },
+            },
         );
     }
 
@@ -268,7 +205,7 @@ export default function Stock({
                             className="rounded-sm border border-line bg-white px-2.5 py-2 text-label text-raisin transition-shadow duration-fast outline-none focus:ring-2 focus:ring-amber"
                         >
                             <option value="">All products</option>
-                            {catalog.map((product) => (
+                            {products.map((product) => (
                                 <option key={product.id} value={product.id}>
                                     {product.name}
                                 </option>
@@ -349,7 +286,7 @@ export default function Stock({
             <RestockDrawer
                 open={restockOpen}
                 onClose={() => setRestockOpen(false)}
-                catalog={catalog}
+                products={products}
                 presetId={restockPresetId}
                 onSubmit={submitRestock}
                 notify={push}
@@ -358,7 +295,7 @@ export default function Stock({
             <AdjustmentDrawer
                 open={adjustOpen}
                 onClose={() => setAdjustOpen(false)}
-                catalog={catalog}
+                products={products}
                 onSubmit={submitAdjustment}
                 notify={push}
             />
@@ -439,14 +376,14 @@ function LowStockDrawer({
 function RestockDrawer({
     open,
     onClose,
-    catalog,
+    products,
     presetId,
     onSubmit,
     notify,
 }: {
     open: boolean;
     onClose: () => void;
-    catalog: Product[];
+    products: Product[];
     presetId: string | null;
     onSubmit: (lines: RestockLine[], note: string, date: string) => void;
     notify: (message: string, tone: 'success' | 'warning' | 'danger') => void;
@@ -458,7 +395,7 @@ function RestockDrawer({
             return [];
         }
 
-        const product = catalog.find((item) => item.id === presetId);
+        const product = products.find((item) => item.id === presetId);
 
         if (product === undefined) {
             return [];
@@ -493,7 +430,7 @@ function RestockDrawer({
             return;
         }
 
-        const product = catalog.find((item) => item.id === pickerProductId);
+        const product = products.find((item) => item.id === pickerProductId);
 
         if (product === undefined) {
             return;
@@ -562,7 +499,7 @@ function RestockDrawer({
                         className="w-full rounded-sm border border-line bg-white px-3 py-2.5 text-body text-raisin transition-shadow duration-fast outline-none focus:ring-2 focus:ring-amber"
                     >
                         <option value="">Pick a product…</option>
-                        {catalog.map((product) => (
+                        {products.map((product) => (
                             <option key={product.id} value={product.id}>
                                 {product.name} ({product.sku})
                             </option>
@@ -649,13 +586,13 @@ function RestockDrawer({
 function AdjustmentDrawer({
     open,
     onClose,
-    catalog,
+    products,
     onSubmit,
     notify,
 }: {
     open: boolean;
     onClose: () => void;
-    catalog: Product[];
+    products: Product[];
     onSubmit: (productId: string, quantity: number, reason: string) => void;
     notify: (message: string, tone: 'success' | 'warning' | 'danger') => void;
 }) {
@@ -667,7 +604,7 @@ function AdjustmentDrawer({
     function handleSubmit(event: FormEvent) {
         event.preventDefault();
 
-        const product = catalog.find((item) => item.id === productId);
+        const product = products.find((item) => item.id === productId);
         const parsedQuantity = Number.parseInt(quantity, 10);
 
         if (product === undefined) {
@@ -742,7 +679,7 @@ function AdjustmentDrawer({
                         className="w-full rounded-sm border border-line bg-white px-3 py-2.5 text-body text-raisin transition-shadow duration-fast outline-none focus:ring-2 focus:ring-amber"
                     >
                         <option value="">Pick a product…</option>
-                        {catalog.map((product) => (
+                        {products.map((product) => (
                             <option key={product.id} value={product.id}>
                                 {product.name} ({product.sku})
                             </option>
