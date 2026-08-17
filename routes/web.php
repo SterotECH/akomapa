@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductsController;
@@ -56,4 +57,8 @@ Route::middleware('auth')->group(function (): void {
         ->name('reports.low-stock');
     Route::get('/reports/sales', [ReportsController::class, 'sales'])
         ->name('reports.sales');
+
+    // Backup
+    Route::get('/backup/download', [BackupController::class, 'download'])
+        ->name('backup.download');
 });

@@ -128,8 +128,8 @@ Reference: SRS v0.2, `spec/interfaces/*.md`, `spec/features/*.md`.
 
 | id   | status | task                                                                 | cites                          |
 | ---- | ------ | -------------------------------------------------------------------- | ------------------------------ |
-| BT25 | .      | BackupController: SQLite snapshot download                           | NFR-5, import-contracts.md §3  |
-| BT26 | .      | Flash messages: wire HandleInertiaRequests to share flash.success/error | data-models.md §7             |
+| BT25 | x      | BackupController: SQLite snapshot download                           | NFR-5, import-contracts.md §3  |
+| BT26 | x      | Flash messages: wire HandleInertiaRequests to share flash.success/error | data-models.md §7             |
 | BT27 | .      | Wire frontend to real data: replace mock-data imports with Inertia props | screen signatures §I           |
 | BT28 | .      | Feature tests: Products CRUD, Stock restock/adjust, Sales store/void | SRS, all FRs                   |
 | BT29 | .      | Feature tests: Reports (stock-levels, low-stock, sales)              | FR-4.1–4.3                     |
