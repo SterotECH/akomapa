@@ -70,7 +70,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
                 <div className="flex items-center gap-1">
                     <ThemeToggle />
-                    <span className="hidden rounded-full border border-line bg-white px-3 py-1 text-label text-spanish-gray sm:block">
+                    <span className="rounded-full border border-line bg-white px-3 py-1 text-label text-spanish-gray">
                         Synthetic data
                     </span>
                     <Link

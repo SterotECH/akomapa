@@ -72,7 +72,7 @@ V12: ⊥ real data in screenshots; synthetic labeled
 | T10 | x      | mock-data module + route wiring                                                                    | V12         |
 | T11 | x      | responsive tablet pass (breakpoints, touch targets)                                                | V10,V11     |
 | T12 | x      | screenshot pass: detect.mjs per screen + DESIGN.md carbonize                                       | V9,V12      |
-| T13 | .      | hand-off: pending decisions, synthetic-data label                                                  | V12         |
+| T13 | x      | hand-off: pending decisions, synthetic-data label                                                  | V12         |
 
 Order rules: T1→T3 foundation. T6 flagship after primitives, before others. T4/T5 early for scaffold proof. T7→T9 after T6. T10 any time after T3 (mock data). T11 after screens exist. T12 last, blocks hand-off. T13 requires T12.
 
@@ -80,3 +80,20 @@ Order rules: T1→T3 foundation. T6 flagship after primitives, before others. T4
 
 | id  | date | cause | fix |
 | --- | ---- | ----- | --- |
+
+## H · Hand-off
+
+Pending decisions before the prototype becomes a real stack:
+
+| id  | area | decision needed | notes |
+| --- | ---- | --------------- | ----- |
+| H1  | Data | Replace mock data with real database | Migrations, factories, seeders needed. Wire to Eloquent models. |
+| H2  | Auth | Real user authentication | Fortify is scaffolded; needs real user model, login flow, session handling. |
+| H3  | POS | Barcode scanner input method | Currently keyboard-wedge only. Consider camera-based scanning for tablets without physical scanners. |
+| H4  | POS | Price override permissions | Unit price is editable inline. Decide if owner-only or configurable. |
+| H5  | Stock | Supplier management | Restock forms have optional supplier note. Full supplier CRUD is out of scope for v1 but may be needed. |
+| H6  | Reports | Export/print format | Currently uses browser print dialog. Consider PDF export for shareable reports. |
+| H7  | Deploy | Hosting and deployment | Laravel Cloud or traditional hosting? Offline-first considerations for spotty internet. |
+| H8  | UI | Dark mode scope | Dark mode CSS variables are implemented. Decide if v1 ships dark mode or defers. |
+| H9  | Multi | Multi-location support | Currently single-shop. Decide if multi-location is a future requirement. |
+| H10 | Data | Real product catalog | ~20 synthetic Ghanaian items. Replace with actual shop inventory when ready. |
