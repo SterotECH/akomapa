@@ -22,7 +22,7 @@ class DashboardController extends Controller
 
         // Low stock products
         $lowStockProducts = Product::active()
-            ->whereColumn('reorder_threshold', '>=', 'stock_on_hand')
+            ->lowStock()
             ->with('category')
             ->get();
 
@@ -38,8 +38,8 @@ class DashboardController extends Controller
                 'sales_total' => $todaySales->total,
                 'low_stock_count' => $lowStockProducts->count(),
             ],
-            'lowStock' => ProductResource::collection($lowStockProducts),
-            'recentMovements' => StockMovementResource::collection($recentMovements),
+            'lowStock' => ProductResource::collection($lowStockProducts)->resolve(),
+            'recentMovements' => StockMovementResource::collection($recentMovements)->resolve(),
         ]);
     }
 }

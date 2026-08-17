@@ -25,14 +25,14 @@ class StockController extends Controller
             ->get();
 
         $lowStockProducts = Product::active()
-            ->whereColumn('reorder_threshold', '>=', 'stock_on_hand')
+            ->lowStock()
             ->with('category')
             ->get();
 
         return Inertia::render('Stock', [
-            'movements' => StockMovementResource::collection($movements),
-            'lowStock' => ProductResource::collection($lowStockProducts),
-            'products' => ProductResource::collection(Product::active()->orderBy('name')->get()),
+            'movements' => StockMovementResource::collection($movements)->resolve(),
+            'lowStock' => ProductResource::collection($lowStockProducts)->resolve(),
+            'products' => ProductResource::collection(Product::active()->orderBy('name')->get())->resolve(),
         ]);
     }
 

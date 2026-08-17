@@ -101,9 +101,10 @@ class Product extends Model
 
     /**
      * Scope: products at or below reorder threshold.
+     * Uses raw subquery because stock_on_hand is a derived accessor, not a column.
      */
     public function scopeLowStock($query)
     {
-        return $query->whereColumn('reorder_threshold', '>=', 'stock_on_hand');
+        return $query->whereRaw('reorder_threshold >= (SELECT COALESCE(SUM(quantity), 0) FROM stock_movements WHERE stock_movements.product_id = products.id)');
     }
 }

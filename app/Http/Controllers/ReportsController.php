@@ -56,7 +56,7 @@ class ReportsController extends Controller
     public function lowStock(): Response
     {
         $products = Product::active()
-            ->whereColumn('reorder_threshold', '>=', 'stock_on_hand')
+            ->lowStock()
             ->with('category')
             ->get()
             ->map(fn ($product) => [

@@ -155,7 +155,7 @@ export default function Reports({
                         transition={gentle}
                     >
                         {activeTab === 'stock-levels' && (
-                            <StockLevelsReport products={products} />
+                            <StockLevelsReport products={stockLevels} />
                         )}
                         {activeTab === 'low-stock' && (
                             <LowStockReport products={lowStock} />

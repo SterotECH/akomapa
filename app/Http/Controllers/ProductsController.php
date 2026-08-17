@@ -29,8 +29,8 @@ class ProductsController extends Controller
         $products = $query->orderBy('name')->get();
 
         return Inertia::render('Products', [
-            'products' => ProductResource::collection($products),
-            'categories' => CategoryResource::collection(Category::orderBy('name')->get()),
+            'products' => ProductResource::collection($products)->resolve(),
+            'categories' => CategoryResource::collection(Category::orderBy('name')->get())->resolve(),
             'filters' => $request->only(['search', 'category_id']),
         ]);
     }

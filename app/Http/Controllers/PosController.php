@@ -29,8 +29,8 @@ class PosController extends Controller
             ->first();
 
         return Inertia::render('Pos', [
-            'products' => ProductResource::collection($products),
-            'categories' => CategoryResource::collection($categories),
+            'products' => ProductResource::collection($products)->resolve(),
+            'categories' => CategoryResource::collection($categories)->resolve(),
             'today_sales' => [
                 'count' => $todaySales->count,
                 'total' => $todaySales->total,
