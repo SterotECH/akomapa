@@ -16,7 +16,6 @@ import {
     TableHead,
     TableRow,
 } from '@/components/Table';
-import { activeProducts, mockSales as initialSales } from '@/lib/mock-data';
 import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import type { Product, Sale } from '@/types';
@@ -24,8 +23,13 @@ import type { Product, Sale } from '@/types';
 type ReportTab = 'stock-levels' | 'low-stock' | 'sales';
 
 type ReportsPageProps = {
-    products?: Product[];
+    activeTab?: ReportTab;
+    stockLevels?: Product[];
+    lowStock?: Product[];
     sales?: Sale[];
+    dateFrom?: string;
+    dateTo?: string;
+    totals?: { cost_value: number; selling_value: number };
 };
 
 const reportTabs: { id: ReportTab; label: string }[] = [
@@ -52,18 +56,18 @@ function formatReportDate(iso: string): string {
 }
 
 export default function Reports({
-    products = activeProducts,
-    sales = initialSales,
+    activeTab: initialTab = 'stock-levels',
+    stockLevels = [],
+    lowStock = [],
+    sales = [],
+    dateFrom,
+    dateTo,
+    totals,
 }: ReportsPageProps) {
     const { gentle } = useSprings();
-    const [activeTab, setActiveTab] = useState<ReportTab>('stock-levels');
-    const [from, setFrom] = useState(isoDate(6));
-    const [to, setTo] = useState(isoDate(0));
-
-    const lowStock = useMemo(
-        () => products.filter((product) => product.is_low_stock),
-        [products],
-    );
+    const [activeTab, setActiveTab] = useState<ReportTab>(initialTab);
+    const [from, setFrom] = useState(dateFrom ?? isoDate(6));
+    const [to, setTo] = useState(dateTo ?? isoDate(0));
 
     const salesInRange = useMemo(() => {
         const fromMs = new Date(`${from}T00:00:00`).getTime();

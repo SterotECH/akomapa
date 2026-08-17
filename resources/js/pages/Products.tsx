@@ -19,18 +19,14 @@ import {
     TableRow,
 } from '@/components/Table';
 import { ToastStack, useToasts } from '@/components/Toast';
-import {
-    categories as mockCategories,
-    products as mockProducts,
-} from '@/lib/mock-data';
-import { createMockId } from '@/lib/mock-id';
 import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import type { Category, Product } from '@/types';
 
 type ProductsPageProps = {
-    products?: Product[];
-    categories?: Category[];
+    products: Product[];
+    categories: Category[];
+    filters?: { search?: string; category_id?: string };
 };
 
 type DrawerState =
@@ -161,14 +157,15 @@ function validateForm(
 }
 
 export default function Products({
-    products: initialProducts = mockProducts,
-    categories = mockCategories,
+    products: initialProducts,
+    categories,
+    filters,
 }: ProductsPageProps) {
     const { gentle } = useSprings();
     const { toasts, push, dismiss } = useToasts();
     const [catalog, setCatalog] = useState(initialProducts);
-    const [search, setSearch] = useState('');
-    const [categoryId, setCategoryId] = useState<string | null>(null);
+    const [search, setSearch] = useState(filters?.search ?? '');
+    const [categoryId, setCategoryId] = useState<string | null>(filters?.category_id ?? null);
     const [drawer, setDrawer] = useState<DrawerState>({
         open: false,
         product: null,

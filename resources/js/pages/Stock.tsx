@@ -20,11 +20,6 @@ import {
 } from '@/components/Table';
 import { ToastStack, useToasts } from '@/components/Toast';
 import { formatGhs, formatSignedQuantity, formatWhen } from '@/lib/format';
-import {
-    activeProducts,
-    stockMovements as mockMovements,
-} from '@/lib/mock-data';
-import { createMockId } from '@/lib/mock-id';
 import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import type { MovementType, Product, StockMovement } from '@/types';
@@ -45,8 +40,9 @@ const quantityClass: Record<MovementType, string> = {
 };
 
 type StockPageProps = {
-    products?: Product[];
-    movements?: StockMovement[];
+    products: Product[];
+    movements: StockMovement[];
+    lowStock: Product[];
 };
 
 type RestockLine = {
@@ -103,8 +99,9 @@ function buildMovement(
 }
 
 export default function Stock({
-    products: initialProducts = activeProducts,
-    movements: initialMovements = mockMovements,
+    products: initialProducts,
+    movements: initialMovements,
+    lowStock,
 }: StockPageProps) {
     const { gentle } = useSprings();
     const { toasts, push, dismiss } = useToasts();
@@ -115,11 +112,6 @@ export default function Stock({
     const [restockPresetId, setRestockPresetId] = useState<string | null>(null);
     const [adjustOpen, setAdjustOpen] = useState(false);
     const [lowStockOpen, setLowStockOpen] = useState(false);
-
-    const lowStock = useMemo(
-        () => catalog.filter((product) => product.is_low_stock),
-        [catalog],
-    );
 
     const filteredMovements = useMemo(() => {
         if (movementFilter.length === 0) {

@@ -19,30 +19,23 @@ import {
 import { TrendChart } from '@/components/TrendChart';
 import type { SalesPoint } from '@/components/TrendChart';
 import { formatSignedQuantity, formatWhen } from '@/lib/format';
-import {
-    lowStockProducts,
-    recentMovements as mockRecentMovements,
-    salesWeek as mockSalesWeek,
-    stockValue,
-    todaySummary as mockToday,
-} from '@/lib/mock-data';
 import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import { index as pos } from '@/routes/pos';
 import { index as reports } from '@/routes/reports';
 import { index as stock } from '@/routes/stock';
-import type { MovementType, StockMovement } from '@/types';
+import type { MovementType, Product, StockMovement } from '@/types';
 
 export type TodaySummary = {
-    sales: number;
-    items: number;
-    lowStock: number;
+    sales_count: number;
+    sales_total: number;
+    low_stock_count: number;
 };
 
 type DashboardPageProps = {
-    today?: TodaySummary;
-    recentMovements?: StockMovement[];
-    salesWeek?: SalesPoint[];
+    today: TodaySummary;
+    lowStock: Product[];
+    recentMovements: StockMovement[];
 };
 
 const primaryLinkClasses =
@@ -124,49 +117,29 @@ const quantityClass: Record<MovementType, string> = {
 };
 
 export default function Dashboard({
-    today = mockToday,
-    recentMovements = mockRecentMovements,
-    salesWeek = mockSalesWeek,
+    today,
+    lowStock,
+    recentMovements,
 }: DashboardPageProps) {
     const { gentle, wobbly } = useSprings();
-    const hasSales = today.sales > 0 && today.items > 0;
+    const hasSales = today.sales_count > 0;
 
     const stats = [
         {
             label: "Today's sales",
             icon: 'cart' as const,
-            content: <Money pesewas={today.sales} className="text-headline" />,
-            accent: false,
-            href: reports.url(),
-        },
-        {
-            label: 'Items sold',
-            icon: 'check' as const,
-            content: today.items.toLocaleString('en-GH'),
+            content: <Money pesewas={today.sales_total} className="text-headline" />,
             accent: false,
             href: reports.url(),
         },
         {
             label: 'Low stock',
             icon: 'warning' as const,
-            content: today.lowStock.toLocaleString('en-GH'),
-            accent: today.lowStock > 0,
-            href: stock.url(),
-        },
-        {
-            label: 'Stock value',
-            icon: 'stock' as const,
-            content: <Money pesewas={stockValue} className="text-headline" />,
-            accent: false,
+            content: today.low_stock_count.toLocaleString('en-GH'),
+            accent: today.low_stock_count > 0,
             href: stock.url(),
         },
     ];
-
-    const previousDay = salesWeek[salesWeek.length - 2]?.value ?? 0;
-    const salesGrowth =
-        previousDay > 0
-            ? Math.round(((today.sales - previousDay) / previousDay) * 100)
-            : 0;
 
     return (
         <>
@@ -185,7 +158,7 @@ export default function Dashboard({
             </div>
 
             <motion.div
-                className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+                className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2"
                 initial="hidden"
                 animate="visible"
                 variants={{
@@ -217,55 +190,24 @@ export default function Dashboard({
             {hasSales ? (
                 <>
                     <motion.div
-                        className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3"
+                        className="mt-6"
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={gentle}
                     >
-                        <Card className="flex flex-col lg:col-span-2">
-                            <div className="flex items-center justify-between border-b border-line px-5 py-4">
-                                <div className="flex items-center gap-2">
-                                    <h2 className="text-headline text-raisin">
-                                        Sales this week
-                                    </h2>
-                                    <Badge
-                                        variant={
-                                            salesGrowth >= 0 ? 'green' : 'amber'
-                                        }
-                                    >
-                                        {salesGrowth >= 0 ? '+' : ''}
-                                        {salesGrowth}%
-                                    </Badge>
-                                </div>
-                                <Link
-                                    href={reports.url()}
-                                    className="inline-flex items-center gap-1 rounded-md px-2 py-2 -ml-2 text-label font-semibold text-raisin transition-colors duration-fast hover:bg-raisin/5 hover:text-amber-deep"
-                                >
-                                    Sales report
-                                    <Icon
-                                        name="arrow-right"
-                                        className="size-4"
-                                    />
-                                </Link>
-                            </div>
-                        <div className="flex flex-1 flex-col px-5 pt-4 pb-4">
-                            <TrendChart data={salesWeek} />
-                        </div>
-                        </Card>
-
                         <Card className="flex flex-col">
                             <div className="flex items-center gap-2 border-b border-line px-5 py-4">
                                 <h2 className="text-headline text-raisin">
                                     Low stock
                                 </h2>
                                 <Badge variant="amber">
-                                    {today.lowStock.toLocaleString('en-GH')}
+                                    {today.low_stock_count.toLocaleString('en-GH')}
                                 </Badge>
                             </div>
 
-                            {lowStockProducts.length > 0 ? (
+                            {lowStock.length > 0 ? (
                                 <ul className="flex-1 divide-y divide-line">
-                                    {lowStockProducts.map((product) => (
+                                    {lowStock.map((product) => (
                                         <li key={product.id}>
                                             <Link
                                                 href={stock.url()}

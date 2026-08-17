@@ -13,11 +13,6 @@ import { StockDot } from '@/components/StockDot';
 import { ToastStack, useToasts } from '@/components/Toast';
 import type { ToastTone } from '@/components/Toast';
 import { formatGhs } from '@/lib/format';
-import {
-    activeProducts,
-    categories as mockCategories,
-    todaySales as mockTodaySales,
-} from '@/lib/mock-data';
 import { useSprings } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import type { CartLine, Category, Product } from '@/types';
@@ -26,15 +21,15 @@ const SEARCH_ID = 'pos-search';
 const MAX_SCAN_LENGTH = 40;
 
 type PosPageProps = {
-    products?: Product[];
-    categories?: Category[];
-    todaySales?: { count: number; total: number };
+    products: Product[];
+    categories: Category[];
+    today_sales: { count: number; total: number };
 };
 
 export default function Pos({
-    products = activeProducts,
-    categories = mockCategories,
-    todaySales = mockTodaySales,
+    products,
+    categories,
+    today_sales,
 }: PosPageProps) {
     const { wobbly } = useSprings();
     const { toasts, push, dismiss } = useToasts();
@@ -336,9 +331,9 @@ export default function Pos({
                         </div>
 
                         <p className="hidden shrink-0 text-label text-spanish-gray md:block">
-                            Today · {todaySales.count} items ·{' '}
+                            Today · {today_sales.count} items ·{' '}
                             <span className="tabular-nums">
-                                {formatGhs(todaySales.total)}
+                                {formatGhs(today_sales.total)}
                             </span>
                         </p>
                     </div>
