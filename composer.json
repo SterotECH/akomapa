@@ -51,6 +51,9 @@
             "npm install",
             "npm run build"
         ],
+        "post-install-cmd": [
+            "@php scripts/post-install.php"
+        ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
             "@php artisan dev"
